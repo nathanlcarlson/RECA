@@ -18,6 +18,7 @@ const float N = 32.0;
 const int n = (int)N;
 const int nsq = n*n;
 const float size = 0.7;
+const float w = size/N;
 float B = 0.01;
 std::mt19937 generator;
 std::uniform_real_distribution<double> distribution(0.0, 1.0);
@@ -131,13 +132,13 @@ void display_state(void) {
   for (int i = -n/2; i<n/2; i++){
     for (int j = -n/2; j<n/2; j++){
       glPushMatrix();
-      glTranslatef( (1+2*i)*size/N, size/N, (1+2*j)*size/N );
+      glTranslatef( (1+2*i)*w, w, (1+2*j)*w );
       //glColor3f(0.0f, 0.0f, 0.0f);
-      //glutWireCube(2*size/N);
+      //glutWireCube(2*w);
 
       glColor3f(state[c], state[c], state[c]);
       c++;
-      glutSolidCube( 2*size/N*(0.995) );
+      glutSolidCube( 2*w );
       glPopMatrix();
     }
   }
