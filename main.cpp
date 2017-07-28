@@ -116,8 +116,6 @@ void display_state(void) {
     for (int j = -n/2; j<n/2; j++){
       glPushMatrix();
       glTranslatef( (1+2*i)*w, w, (1+2*j)*w );
-      //glColor3f(0.0f, 0.0f, 0.0f);
-      //glutWireCube(2*w);
 
       glColor3f(state[c], state[c], state[c]);
       c++;
@@ -137,7 +135,6 @@ void draw(void) {
   // Rotate when user changes rotate_x and rotate_y
   glRotatef( rotate_x, 1.0, 0.0, 0.0 );
   glRotatef( rotate_y, 0.0, 1.0, 0.0 );
-
 
   change_state();
 
