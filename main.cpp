@@ -109,24 +109,7 @@ void change_state(void) {
   traversed.clear();
 
 }
-void display_grid(void){
-  //Grid
-  float p;
-  glColor3f(1.0f, 1.0f, 1.0f);
-  for (int i = 0; i<n+1; i++){
-    //Horizontal lines
-    p = size-2*size*i/N;
-    glBegin(GL_LINES);
-    glVertex3f(    size,  0.0,  p );
-    glVertex3f( -1*size,  0.0,  p );
-    glEnd();
-    //Vertical lines
-    glBegin(GL_LINES);
-    glVertex3f(  p,  0.0,    size );
-    glVertex3f(  p,  0.0, -1*size );
-    glEnd();
-  }
-}
+
 void display_state(void) {
   int c = 0;
   for (int i = -n/2; i<n/2; i++){
@@ -159,8 +142,6 @@ void draw(void) {
   change_state();
 
   display_state();
-
-  //display_grid();
 
   glutPostRedisplay();
   glFlush();
