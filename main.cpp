@@ -40,19 +40,19 @@ double energy(int i) {
   double E = 0.0;
   // Above
   if( (i - n) >= 0){
-    E += -1.0*cos(replica[i] - state[i-n]);
+    E += -1.0*cos(2.0*M_PI*replica[i] - 2.0*M_PI*state[i-n]);
   }
   // Below
   if( (i + n) < nsq){
-    E += -1.0*cos(replica[i] - state[i+n]);
+    E += -1.0*cos(2.0*M_PI*replica[i] - 2.0*M_PI*state[i+n]);
   }
   //Left
   if( ((i - 1) >= 0) && (((i - 1) % n) != (n-1)) ){
-    E += -1.0*cos(replica[i] - state[i-1]);
+    E += -1.0*cos(2.0*M_PI*replica[i] - 2.0*M_PI*state[i-1]);
   }
   //Right
   if( ((i + 1) < nsq) && (((i + 1) % n) != 0) ){
-    E += -1.0*cos(replica[i] - state[i+1]);
+    E += -1.0*cos(2.0*M_PI*replica[i] - 2.0*M_PI*state[i+1]);
   }
   traversed.push_back(i);
   printf("%f\n",E*B);
@@ -120,9 +120,9 @@ double huetorgb(double t){
 
   if(t < 0.0) t += 1.0;
   if(t > 1.0) t -= 1.0;
-  if(t < 1.0/6.0) return 6.0 * t;
-  if(t < 1.0/2.0) return 1.0;
-  if(t < 2.0/3.0) return (2.0/3.0 - t) * 6.0;
+  if(t < 0.16667) return 6.0 * t;
+  if(t < 0.5) return 1.0;
+  if(t < 0.6666) return (2.0/3.0 - t) * 6.0;
   return 0.0;
 }
 // Saturation = 1
