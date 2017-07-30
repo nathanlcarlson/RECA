@@ -27,6 +27,12 @@ std::array< double, nsq > state;
 std::array< double, nsq > replica;
 std::vector< int > traversed;
 
+struct rgb{
+  double r;
+  double g;
+  double b;
+} ;
+
 bool in_traversed(int i) {
   return std::find(traversed.begin(), traversed.end(), i) != traversed.end();
 }
@@ -110,14 +116,33 @@ void change_state(void) {
 
 }
 
+double huetorgb(double t){
+
+  if(t < 0.0) t += 1.0;
+  if(t > 1.0) t -= 1.0;
+  if(t < 1.0/6.0) return 6.0 * t;
+  if(t < 1.0/2.0) return 1.0;
+  if(t < 2.0/3.0) return (2.0/3.0 - t) * 6.0;
+  return 0.0;
+}
+// Saturation = 1
+// Lightness = 0.5
+rgb hsltorgb(double h){
+  rgb color;
+  color.r = huetorgb(h + 0.3333);
+  color.g = huetorgb(h);
+  color.b = huetorgb(h - 0.3333);
+  return color;
+}
 void display_state(void) {
   int c = 0;
+  rgb color;
   for (int i = -n/2; i<n/2; i++){
     for (int j = -n/2; j<n/2; j++){
       glPushMatrix();
       glTranslatef( (1+2*i)*w, w, (1+2*j)*w );
-
-      glColor3f(state[c], state[c], state[c]);
+      color = hsltorgb(state[c]);
+      glColor3f(color.r, color.g, color.b);
       c++;
       glutSolidCube( 2*w );
       glPopMatrix();
