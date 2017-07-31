@@ -175,11 +175,11 @@ void specialKeys(int key, //The key that was pressed
 
   //  Right arrow - increase rotation by 5 degree
   if (key == GLUT_KEY_RIGHT)
-    rotate_y += 5;
+    B += 2.0;
 
   //  Left arrow - decrease rotation by 5 degree
   else if (key == GLUT_KEY_LEFT)
-    rotate_y -= 5;
+    B -= 2.0;
 
   else if (key == GLUT_KEY_UP)
     rotate_x += 5;
