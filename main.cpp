@@ -40,22 +40,22 @@ double energy(int i) {
   double E = 0.0;
   // Above
   if( (i - n) >= 0){
-    E += -1.0*cos(2.0*M_PI*replica[i] - 2.0*M_PI*state[i-n]);
+    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i-n])) + cos(2.0*M_PI*(state[i] - state[i-n]));
   }
   // Below
   if( (i + n) < nsq){
-    E += -1.0*cos(2.0*M_PI*replica[i] - 2.0*M_PI*state[i+n]);
+    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i+n])) + cos(2.0*M_PI*(state[i] - state[i+n]));
   }
   //Left
   if( ((i - 1) >= 0) && (((i - 1) % n) != (n-1)) ){
-    E += -1.0*cos(2.0*M_PI*replica[i] - 2.0*M_PI*state[i-1]);
+    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i-1])) + cos(2.0*M_PI*(state[i] - state[i-1]));
   }
   //Right
   if( ((i + 1) < nsq) && (((i + 1) % n) != 0) ){
-    E += -1.0*cos(2.0*M_PI*replica[i] - 2.0*M_PI*state[i+1]);
+    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i+1])) + cos(2.0*M_PI*(state[i] - state[i+1]));
   }
   traversed.push_back(i);
-  printf("%f\n",E*B);
+  printf("%f\n",B);
   return E;
 }
 
