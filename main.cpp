@@ -36,32 +36,18 @@ struct rgb{
 bool in_traversed(int i) {
   return std::find(traversed.begin(), traversed.end(), i) != traversed.end();
 }
-double energy(int i) {
-  double E = 0.0;
-  // Above
-  if( (i - n) >= 0){
-    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i-n])) + cos(2.0*M_PI*(state[i] - state[i-n]));
-  }
-  // Below
-  if( (i + n) < nsq){
-    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i+n])) + cos(2.0*M_PI*(state[i] - state[i+n]));
-  }
-  //Left
-  if( ((i - 1) >= 0) && (((i - 1) % n) != (n-1)) ){
-    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i-1])) + cos(2.0*M_PI*(state[i] - state[i-1]));
-  }
-  //Right
-  if( ((i + 1) < nsq) && (((i + 1) % n) != 0) ){
-    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i+1])) + cos(2.0*M_PI*(state[i] - state[i+1]));
-  }
-  traversed.push_back(i);
-  printf("%f\n",B);
+double energy(int i, int j) {
+  traversed.push_back(j);
+
+  double E = cos(2.0*M_PI*(state[i] - state[j])) - cos(2.0*M_PI*(state[i] - replica[j]));
+  printf("%f\n", E*B);
+
   return E;
 }
 
 void propigate(int i) {
   if( (i-n) >= 0 && !(in_traversed(i-n))){
-    if( (1 - exp(B*energy(i-n))) >  distribution(generator)){
+    if( (1 - exp(B*energy(i, i-n))) >  distribution(generator)){
       double tmp = replica[i-n];
       replica[i-n] = state[i-n];
       state[i-n] = tmp;
@@ -69,7 +55,7 @@ void propigate(int i) {
     }
   }
   if( (i+n) < nsq && !(in_traversed(i+n))){
-    if( (1 - exp(B*energy(i+n))) >  distribution(generator)){
+    if( (1 - exp(B*energy(i, i+n))) >  distribution(generator)){
       double tmp = replica[i+n];
       replica[i+n] = state[i+n];
       state[i+n] = tmp;
@@ -77,7 +63,7 @@ void propigate(int i) {
     }
   }
   if( ((i - 1) >= 0) && (((i - 1) % n) != (n-1)) && !(in_traversed(i-1)) ){
-    if( (1 - exp(B*energy(i-1))) >  distribution(generator)){
+    if( (1 - exp(B*energy(i, i-1))) >  distribution(generator)){
       double tmp = replica[i-1];
       replica[i-1] = state[i-1];
       state[i-1] = tmp;
@@ -85,7 +71,7 @@ void propigate(int i) {
     }
   }
   if( ((i + 1) < nsq) && (((i + 1) % n) != 0) && !(in_traversed(i+1))){
-    if( (1 - exp(B*energy(i+1))) >  distribution(generator)){
+    if( (1 - exp(B*energy(i, i+1))) >  distribution(generator)){
       double tmp = replica[i+1];
       replica[i+1] = state[i+1];
       state[i+1] = tmp;
