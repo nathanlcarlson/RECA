@@ -5,12 +5,7 @@
 #include <array>
 #include <vector>
 #include <algorithm>
-#ifdef __APPLE__
-#include <OpenGL/OpenGL.h>
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include <GLFW/glfw3.h>
 
 double rotate_y=0;
 double rotate_x=0;
@@ -123,66 +118,39 @@ rgb hsltorgb(double h){
 void display_state(void) {
   int c = 0;
   rgb color;
+  glBegin(GL_TRIANGLES);
   for (int i = -n/2; i<n/2; i++){
     for (int j = -n/2; j<n/2; j++){
-      glPushMatrix();
-      glTranslatef( (1+2*i)*w, w, (1+2*j)*w );
       color = hsltorgb(state[c]);
       glColor3f(color.r, color.g, color.b);
       c++;
-      glutSolidCube( 2*w );
-      glPopMatrix();
+      //Make Square
+      glVertex3f( (1+2*i)*w-w, (1+2*j)*w-w, 0.0);
+      glVertex3f( (1+2*i)*w-w, (1+2*j)*w+w, 0.0);
+      glVertex3f( (1+2*i)*w+w, (1+2*j)*w-w, 0.0);
+      glVertex3f( (1+2*i)*w-w, (1+2*j)*w+w, 0.0);
+      glVertex3f( (1+2*i)*w+w, (1+2*j)*w-w, 0.0);
+      glVertex3f( (1+2*i)*w+w, (1+2*j)*w+w, 0.0);
     }
   }
+  glEnd();
 }
-void draw(void) {
+void specialKeys(GLFWwindow* window, int key, int scancode, int action, int mods) {    //The current mouse coordinates)
+  if (key == GLFW_KEY_ESCAPE )
+    exit(0);
 
-  //  Clear screen and Z-buffer
-  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-  // Reset transformations
-  glLoadIdentity();
-
-  // Rotate when user changes rotate_x and rotate_y
-  glRotatef( rotate_x, 1.0, 0.0, 0.0 );
-  glRotatef( rotate_y, 0.0, 1.0, 0.0 );
-
-  change_state();
-
-  display_state();
-
-  glutPostRedisplay();
-  glFlush();
-  glutSwapBuffers();
-
-}
-void specialKeys(int key, //The key that was pressed
-                  int x, int y) {    //The current mouse coordinates)
-
-  //  Right arrow - increase rotation by 5 degree
-  if (key == GLUT_KEY_RIGHT)
+  else if (key == GLFW_KEY_RIGHT)
     B += 2.0;
 
-  //  Left arrow - decrease rotation by 5 degree
-  else if (key == GLUT_KEY_LEFT)
+  else if (key == GLFW_KEY_LEFT)
     B -= 2.0;
 
-  else if (key == GLUT_KEY_UP)
+  else if (key == GLFW_KEY_UP)
     rotate_x += 5;
 
-  else if (key == GLUT_KEY_DOWN)
+  else if (key == GLFW_KEY_DOWN)
     rotate_x -= 5;
-
-  //  Request display update
-  glutPostRedisplay();
-
 }
-void handleKeypress(unsigned char key, //The key that was pressed
-                  int x, int y) {    //The current mouse coordinates
-  if (key == 27)
-    exit(0);
-}
-
 //Main program
 int main(int argc, char **argv) {
 
@@ -191,32 +159,49 @@ int main(int argc, char **argv) {
       state[i] = distribution(generator);
   }
   replica = state;
-  //Initialize GLUT and process user parameters
-  glutInit(&argc,argv);
 
-  //  Request double buffered true color window with Z-buffer
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-
-  //Configure Window Postion
-  glutInitWindowPosition(50, 25);
-
-  //Configure Window Size
-  glutInitWindowSize(600,600);
-
-  //Create Window
-  glutCreateWindow("Hello OpenGL");
-
-  //  Enable Z-buffer depth test
   glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LEQUAL);
 
-  //Call to the drawing function
-  glutDisplayFunc(draw);
+  GLFWwindow* window;
 
-  //Handle a keypress
-  glutKeyboardFunc(handleKeypress);
-  glutSpecialFunc(specialKeys);
+  /* Initialize the library */
+  if (!glfwInit())
+      return -1;
 
-  // Loop require by OpenGL
-  glutMainLoop();
+  /* Create a windowed mode window and its OpenGL context */
+  window = glfwCreateWindow(640, 640, "Hello World", NULL, NULL);
+  if (!window)
+  {
+      glfwTerminate();
+      return -1;
+  }
+
+  /* Make the window's context current */
+  glfwMakeContextCurrent(window);
+  glfwSetKeyCallback(window, specialKeys);
+  /* Loop until the user closes the window */
+  while (!glfwWindowShouldClose(window))
+  {
+      /* Render here */
+      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+      // Reset transformations
+      glLoadIdentity();
+      // Rotate when user changes rotate_x and rotate_y
+      glRotatef( rotate_x, 1.0, 0.0, 0.0 );
+      glRotatef( rotate_y, 0.0, 1.0, 0.0 );
+
+      change_state();
+
+      display_state();
+
+      /* Swap front and back buffers */
+      glfwSwapBuffers(window);
+
+      /* Poll for and process events */
+      glfwPollEvents();
+  }
+
+  glfwTerminate();
   return 0;
 }
