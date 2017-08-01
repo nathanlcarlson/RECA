@@ -27,6 +27,12 @@ std::array< double, nsq > state;
 std::array< double, nsq > replica;
 std::vector< int > traversed;
 
+struct rgb{
+  double r;
+  double g;
+  double b;
+} ;
+
 bool in_traversed(int i) {
   return std::find(traversed.begin(), traversed.end(), i) != traversed.end();
 }
@@ -34,22 +40,22 @@ double energy(int i) {
   double E = 0.0;
   // Above
   if( (i - n) >= 0){
-    E += -1.0*cos(replica[i] - state[i-n]);
+    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i-n])) + cos(2.0*M_PI*(state[i] - state[i-n]));
   }
   // Below
   if( (i + n) < nsq){
-    E += -1.0*cos(replica[i] - state[i+n]);
+    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i+n])) + cos(2.0*M_PI*(state[i] - state[i+n]));
   }
   //Left
   if( ((i - 1) >= 0) && (((i - 1) % n) != (n-1)) ){
-    E += -1.0*cos(replica[i] - state[i-1]);
+    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i-1])) + cos(2.0*M_PI*(state[i] - state[i-1]));
   }
   //Right
   if( ((i + 1) < nsq) && (((i + 1) % n) != 0) ){
-    E += -1.0*cos(replica[i] - state[i+1]);
+    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i+1])) + cos(2.0*M_PI*(state[i] - state[i+1]));
   }
   traversed.push_back(i);
-  printf("%f\n",E*B);
+  printf("%f\n",B);
   return E;
 }
 
@@ -110,14 +116,33 @@ void change_state(void) {
 
 }
 
+double huetorgb(double t){
+
+  if(t < 0.0) t += 1.0;
+  if(t > 1.0) t -= 1.0;
+  if(t < 0.16667) return 6.0 * t;
+  if(t < 0.5) return 1.0;
+  if(t < 0.6666) return (2.0/3.0 - t) * 6.0;
+  return 0.0;
+}
+// Saturation = 1
+// Lightness = 0.5
+rgb hsltorgb(double h){
+  rgb color;
+  color.r = huetorgb(h + 0.3333);
+  color.g = huetorgb(h);
+  color.b = huetorgb(h - 0.3333);
+  return color;
+}
 void display_state(void) {
   int c = 0;
+  rgb color;
   for (int i = -n/2; i<n/2; i++){
     for (int j = -n/2; j<n/2; j++){
       glPushMatrix();
       glTranslatef( (1+2*i)*w, w, (1+2*j)*w );
-
-      glColor3f(state[c], state[c], state[c]);
+      color = hsltorgb(state[c]);
+      glColor3f(color.r, color.g, color.b);
       c++;
       glutSolidCube( 2*w );
       glPopMatrix();
@@ -150,11 +175,11 @@ void specialKeys(int key, //The key that was pressed
 
   //  Right arrow - increase rotation by 5 degree
   if (key == GLUT_KEY_RIGHT)
-    rotate_y += 5;
+    B += 2.0;
 
   //  Left arrow - decrease rotation by 5 degree
   else if (key == GLUT_KEY_LEFT)
-    rotate_y -= 5;
+    B -= 2.0;
 
   else if (key == GLUT_KEY_UP)
     rotate_x += 5;
