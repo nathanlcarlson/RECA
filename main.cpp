@@ -7,14 +7,17 @@
 #include <algorithm>
 #include <GLFW/glfw3.h>
 
-double rotate_y=0;
-double rotate_x=0;
 const float N = 32.0;
 const int n = (int)N;
 const int nsq = n*n;
 const float size = 0.7;
 const float w = size/N;
+
+double rotate_y=0;
+double rotate_x=0;
 float B = 0.01;
+bool render = true;
+
 std::mt19937 generator;
 std::uniform_real_distribution<double> distribution(0.0, 1.0);
 
@@ -150,6 +153,9 @@ void specialKeys(GLFWwindow* window, int key, int scancode, int action, int mods
 
   else if (key == GLFW_KEY_DOWN)
     rotate_x -= 5;
+
+  else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+    render = !(render);
 }
 //Main program
 int main(int argc, char **argv) {
@@ -192,6 +198,11 @@ int main(int argc, char **argv) {
       glRotatef( rotate_y, 0.0, 1.0, 0.0 );
 
       change_state();
+
+      while(!(render)){
+        glfwPollEvents();
+        change_state();
+      }
 
       display_state();
 
