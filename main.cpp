@@ -5,21 +5,20 @@
 #include <array>
 #include <vector>
 #include <algorithm>
-#ifdef __APPLE__
-#include <OpenGL/OpenGL.h>
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include <GLFW/glfw3.h>
 
-double rotate_y=0;
-double rotate_x=0;
 const float N = 32.0;
 const int n = (int)N;
 const int nsq = n*n;
 const float size = 0.7;
 const float w = size/N;
+
+double rotate_y=0;
+double rotate_x=0;
 float B = 0.01;
+bool render = true;
+bool step_mode = false;
+
 std::mt19937 generator;
 std::uniform_real_distribution<double> distribution(0.0, 1.0);
 
@@ -36,32 +35,18 @@ struct rgb{
 bool in_traversed(int i) {
   return std::find(traversed.begin(), traversed.end(), i) != traversed.end();
 }
-double energy(int i) {
-  double E = 0.0;
-  // Above
-  if( (i - n) >= 0){
-    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i-n])) + cos(2.0*M_PI*(state[i] - state[i-n]));
-  }
-  // Below
-  if( (i + n) < nsq){
-    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i+n])) + cos(2.0*M_PI*(state[i] - state[i+n]));
-  }
-  //Left
-  if( ((i - 1) >= 0) && (((i - 1) % n) != (n-1)) ){
-    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i-1])) + cos(2.0*M_PI*(state[i] - state[i-1]));
-  }
-  //Right
-  if( ((i + 1) < nsq) && (((i + 1) % n) != 0) ){
-    E += -1.0*cos(2.0*M_PI*(replica[i] - state[i+1])) + cos(2.0*M_PI*(state[i] - state[i+1]));
-  }
-  traversed.push_back(i);
-  printf("%f\n",B);
+double energy(int i, int j) {
+  traversed.push_back(j);
+
+  double E = cos(2.0*M_PI*(state[i] - state[j])) - cos(2.0*M_PI*(state[i] - replica[j]));
+  printf("%f\n", E*B);
+
   return E;
 }
 
 void propigate(int i) {
   if( (i-n) >= 0 && !(in_traversed(i-n))){
-    if( (1 - exp(B*energy(i-n))) >  distribution(generator)){
+    if( (1 - exp(B*energy(i, i-n))) >  distribution(generator)){
       double tmp = replica[i-n];
       replica[i-n] = state[i-n];
       state[i-n] = tmp;
@@ -69,7 +54,7 @@ void propigate(int i) {
     }
   }
   if( (i+n) < nsq && !(in_traversed(i+n))){
-    if( (1 - exp(B*energy(i+n))) >  distribution(generator)){
+    if( (1 - exp(B*energy(i, i+n))) >  distribution(generator)){
       double tmp = replica[i+n];
       replica[i+n] = state[i+n];
       state[i+n] = tmp;
@@ -77,7 +62,7 @@ void propigate(int i) {
     }
   }
   if( ((i - 1) >= 0) && (((i - 1) % n) != (n-1)) && !(in_traversed(i-1)) ){
-    if( (1 - exp(B*energy(i-1))) >  distribution(generator)){
+    if( (1 - exp(B*energy(i, i-1))) >  distribution(generator)){
       double tmp = replica[i-1];
       replica[i-1] = state[i-1];
       state[i-1] = tmp;
@@ -85,7 +70,7 @@ void propigate(int i) {
     }
   }
   if( ((i + 1) < nsq) && (((i + 1) % n) != 0) && !(in_traversed(i+1))){
-    if( (1 - exp(B*energy(i+1))) >  distribution(generator)){
+    if( (1 - exp(B*energy(i, i+1))) >  distribution(generator)){
       double tmp = replica[i+1];
       replica[i+1] = state[i+1];
       state[i+1] = tmp;
@@ -137,66 +122,46 @@ rgb hsltorgb(double h){
 void display_state(void) {
   int c = 0;
   rgb color;
+  glBegin(GL_TRIANGLES);
   for (int i = -n/2; i<n/2; i++){
     for (int j = -n/2; j<n/2; j++){
-      glPushMatrix();
-      glTranslatef( (1+2*i)*w, w, (1+2*j)*w );
       color = hsltorgb(state[c]);
       glColor3f(color.r, color.g, color.b);
       c++;
-      glutSolidCube( 2*w );
-      glPopMatrix();
+      //Make Square
+      glVertex3f( (1+2*i)*w-w, (1+2*j)*w-w, 0.0);
+      glVertex3f( (1+2*i)*w-w, (1+2*j)*w+w, 0.0);
+      glVertex3f( (1+2*i)*w+w, (1+2*j)*w-w, 0.0);
+      glVertex3f( (1+2*i)*w-w, (1+2*j)*w+w, 0.0);
+      glVertex3f( (1+2*i)*w+w, (1+2*j)*w-w, 0.0);
+      glVertex3f( (1+2*i)*w+w, (1+2*j)*w+w, 0.0);
     }
   }
+  glEnd();
 }
-void draw(void) {
+void specialKeys(GLFWwindow* window, int key, int scancode, int action, int mods) {    //The current mouse coordinates)
+  if (key == GLFW_KEY_ESCAPE )
+    exit(0);
 
-  //  Clear screen and Z-buffer
-  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-  // Reset transformations
-  glLoadIdentity();
-
-  // Rotate when user changes rotate_x and rotate_y
-  glRotatef( rotate_x, 1.0, 0.0, 0.0 );
-  glRotatef( rotate_y, 0.0, 1.0, 0.0 );
-
-  change_state();
-
-  display_state();
-
-  glutPostRedisplay();
-  glFlush();
-  glutSwapBuffers();
-
-}
-void specialKeys(int key, //The key that was pressed
-                  int x, int y) {    //The current mouse coordinates)
-
-  //  Right arrow - increase rotation by 5 degree
-  if (key == GLUT_KEY_RIGHT)
+  else if (key == GLFW_KEY_RIGHT)
     B += 2.0;
 
-  //  Left arrow - decrease rotation by 5 degree
-  else if (key == GLUT_KEY_LEFT)
+  else if (key == GLFW_KEY_LEFT)
     B -= 2.0;
 
-  else if (key == GLUT_KEY_UP)
+  else if (key == GLFW_KEY_UP)
     rotate_x += 5;
 
-  else if (key == GLUT_KEY_DOWN)
+  else if (key == GLFW_KEY_DOWN)
     rotate_x -= 5;
 
-  //  Request display update
-  glutPostRedisplay();
+  else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+    render = !(render);
+
+  else if (key == GLFW_KEY_S && action == GLFW_PRESS)
+    step_mode = !(step_mode);
 
 }
-void handleKeypress(unsigned char key, //The key that was pressed
-                  int x, int y) {    //The current mouse coordinates
-  if (key == 27)
-    exit(0);
-}
-
 //Main program
 int main(int argc, char **argv) {
 
@@ -205,32 +170,60 @@ int main(int argc, char **argv) {
       state[i] = distribution(generator);
   }
   replica = state;
-  //Initialize GLUT and process user parameters
-  glutInit(&argc,argv);
 
-  //  Request double buffered true color window with Z-buffer
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-
-  //Configure Window Postion
-  glutInitWindowPosition(50, 25);
-
-  //Configure Window Size
-  glutInitWindowSize(600,600);
-
-  //Create Window
-  glutCreateWindow("Hello OpenGL");
-
-  //  Enable Z-buffer depth test
   glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LEQUAL);
 
-  //Call to the drawing function
-  glutDisplayFunc(draw);
+  GLFWwindow* window;
 
-  //Handle a keypress
-  glutKeyboardFunc(handleKeypress);
-  glutSpecialFunc(specialKeys);
+  /* Initialize the library */
+  if (!glfwInit())
+      return -1;
 
-  // Loop require by OpenGL
-  glutMainLoop();
+  /* Create a windowed mode window and its OpenGL context */
+  window = glfwCreateWindow(640, 640, "Hello World", NULL, NULL);
+  if (!window)
+  {
+      glfwTerminate();
+      return -1;
+  }
+
+  /* Make the window's context current */
+  glfwMakeContextCurrent(window);
+  glfwSetKeyCallback(window, specialKeys);
+  /* Loop until the user closes the window */
+  while (!glfwWindowShouldClose(window))
+  {
+      /* Render here */
+      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+      // Reset transformations
+      glLoadIdentity();
+      // Rotate when user changes rotate_x and rotate_y
+      glRotatef( rotate_x, 1.0, 0.0, 0.0 );
+      glRotatef( rotate_y, 0.0, 1.0, 0.0 );
+
+      change_state();
+
+      while(!(render)){
+        glfwPollEvents();
+        change_state();
+      }
+      while(step_mode){
+        glfwPollEvents();
+        if( glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
+          change_state();
+        display_state();
+        glfwSwapBuffers(window);
+      }
+      display_state();
+
+      /* Swap front and back buffers */
+      glfwSwapBuffers(window);
+
+      /* Poll for and process events */
+      glfwPollEvents();
+  }
+
+  glfwTerminate();
   return 0;
 }
