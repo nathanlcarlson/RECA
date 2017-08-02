@@ -17,6 +17,7 @@ double rotate_y=0;
 double rotate_x=0;
 float B = 0.01;
 bool render = true;
+bool step_mode = false;
 
 std::mt19937 generator;
 std::uniform_real_distribution<double> distribution(0.0, 1.0);
@@ -156,6 +157,10 @@ void specialKeys(GLFWwindow* window, int key, int scancode, int action, int mods
 
   else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
     render = !(render);
+
+  else if (key == GLFW_KEY_S && action == GLFW_PRESS)
+    step_mode = !(step_mode);
+
 }
 //Main program
 int main(int argc, char **argv) {
@@ -203,7 +208,13 @@ int main(int argc, char **argv) {
         glfwPollEvents();
         change_state();
       }
-
+      while(step_mode){
+        glfwPollEvents();
+        if( glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
+          change_state();
+        display_state();
+        glfwSwapBuffers(window);
+      }
       display_state();
 
       /* Swap front and back buffers */
