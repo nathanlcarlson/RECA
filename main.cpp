@@ -7,11 +7,11 @@
 #include <algorithm>
 #include <GLFW/glfw3.h>
 
-const float N = 32.0;
-const int n = (int)N;
-const int nsq = n*n;
-const float size = 0.7;
-const float w = size/N;
+constexpr float N = 32.0;
+constexpr int n = (int)N;
+constexpr int nsq = n*n;
+constexpr float size = 0.7;
+constexpr float w = size/N;
 
 double rotate_y=0;
 double rotate_x=0;
