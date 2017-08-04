@@ -5,24 +5,24 @@ else
 endif
 
 CXX := g++
-CXXFLAGS := -std=c++11
+CXXFLAGS := -std=c++11 -static
 INCLUDES := -I.
-LIBS := -lglfw
-OBJECTS := main.o
+LIBS := -L/usr/local/lib -lglfw
+
 
 ifeq ($(detected_OS),Windows)
     CXXFLAGS += -D WIN32
 endif
 ifeq ($(detected_OS),Darwin)  # Mac OS X
     CXXFLAGS += -D OSX
-	LIBS += -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo
+	LIBS += -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
 endif
 ifeq ($(detected_OS),Linux)
     CXXFLAGS += -D LINUX
-	LIBS += -lGL	
+	  LIBS += -Wl,-rpath,/usr/local/lib -lGL
 endif
 
-test: $(OBJECTS)
-	$(CXX) $<  -o $@ $(LIBS)
-.cpp.o:
-	$(CXX) $(INCLUDES) $(CXXFLAGS) -c $<  -o $@
+test: main.o
+	$(CXX) main.o -o test $(LIBS)
+main.o: main.cpp
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -c main.cpp  -o main.o
