@@ -26,12 +26,6 @@ std::array< double, nsq > state;
 std::array< double, nsq > replica;
 std::vector< int > traversed;
 
-struct rgb{
-  double r;
-  double g;
-  double b;
-} ;
-
 bool in_traversed(int i) {
   return std::find(traversed.begin(), traversed.end(), i) != traversed.end();
 }
@@ -100,33 +94,25 @@ void change_state(void) {
   traversed.clear();
 
 }
-
-double huetorgb(double t){
-
-  if(t < 0.0) t += 1.0;
-  if(t > 1.0) t -= 1.0;
-  if(t < 0.16667) return 6.0 * t;
-  if(t < 0.5) return 1.0;
-  if(t < 0.6666) return (2.0/3.0 - t) * 6.0;
-  return 0.0;
-}
 // Saturation = 1
 // Lightness = 0.5
-rgb hsltorgb(double h){
-  rgb color;
-  color.r = huetorgb(h + 0.3333);
-  color.g = huetorgb(h);
-  color.b = huetorgb(h - 0.3333);
-  return color;
+double huetorgb(double t){
+  if(t < 0.0) t += 1.0;
+  if(t > 1.0) t -= 1.0;
+  if(t < 0.1666) return 6.0 * t;
+  if(t < 0.5) return 1.0;
+  if(t < 0.6666) return (0.6666 - t) * 6.0;
+  return 0.0;
 }
+
 void display_state(void) {
   int c = 0;
-  rgb color;
   glBegin(GL_TRIANGLES);
   for (int i = -n/2; i<n/2; i++){
     for (int j = -n/2; j<n/2; j++){
-      color = hsltorgb(state[c]);
-      glColor3f(color.r, color.g, color.b);
+      glColor3f(huetorgb(state[c] + 0.3333),
+                huetorgb(state[c]),
+                huetorgb(state[c] - 0.3333));
       c++;
       //Make Square
       glVertex3f( (1+2*i)*w-w, (1+2*j)*w-w, 0.0);
