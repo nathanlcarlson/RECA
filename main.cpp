@@ -1,11 +1,25 @@
-#include <stdio.h>
+#include <iostream>
 #include <stdarg.h>
 #include <math.h>
-#include <random>
 #include <array>
 #include <vector>
 #include <algorithm>
+//#include <memory>
 #include <GLFW/glfw3.h>
+#include "utils.hpp"
+#include "fields.hpp"
+#include "graph.hpp"
+
+using namespace utils;
+using namespace fields;
+using namespace graph;
+
+
+//For outliving declared scope
+//auto myfield = std::make_unique<GeneralField>(10, 11.1);
+GeneralField myfield(100, 10.0);
+GeneralGraph mygraph(100);
+
 
 constexpr float N = 32.0;
 constexpr int n = (int)N;
@@ -30,17 +44,17 @@ bool in_traversed(int i) {
   return std::find(traversed.begin(), traversed.end(), i) != traversed.end();
 }
 double energy(int i, int j) {
-  traversed.push_back(j);
 
   double E = cos(2.0*M_PI*(state[i] - state[j])) - cos(2.0*M_PI*(state[i] - replica[j]));
-  printf("%f\n", E*B);
+  //printf("%f\n", E*B);
 
   return E;
 }
 
 void propigate(int i) {
   if( (i-n) >= 0 && !(in_traversed(i-n))){
-    if( (1 - exp(B*energy(i, i-n))) >  distribution(generator)){
+    traversed.push_back(i-n);
+    if( (1 - exp(B*energy(i, i-n))) >  rand0_1()){
       double tmp = replica[i-n];
       replica[i-n] = state[i-n];
       state[i-n] = tmp;
@@ -48,7 +62,8 @@ void propigate(int i) {
     }
   }
   if( (i+n) < nsq && !(in_traversed(i+n))){
-    if( (1 - exp(B*energy(i, i+n))) >  distribution(generator)){
+    traversed.push_back(i+n);
+    if( (1 - exp(B*energy(i, i+n))) >  rand0_1()){
       double tmp = replica[i+n];
       replica[i+n] = state[i+n];
       state[i+n] = tmp;
@@ -56,7 +71,8 @@ void propigate(int i) {
     }
   }
   if( ((i - 1) >= 0) && (((i - 1) % n) != (n-1)) && !(in_traversed(i-1)) ){
-    if( (1 - exp(B*energy(i, i-1))) >  distribution(generator)){
+    traversed.push_back(i-1);
+    if( (1 - exp(B*energy(i, i-1))) >  rand0_1()){
       double tmp = replica[i-1];
       replica[i-1] = state[i-1];
       state[i-1] = tmp;
@@ -64,7 +80,8 @@ void propigate(int i) {
     }
   }
   if( ((i + 1) < nsq) && (((i + 1) % n) != 0) && !(in_traversed(i+1))){
-    if( (1 - exp(B*energy(i, i+1))) >  distribution(generator)){
+    traversed.push_back(i+1);
+    if( (1 - exp(B*energy(i, i+1))) >  rand0_1()){
       double tmp = replica[i+1];
       replica[i+1] = state[i+1];
       state[i+1] = tmp;
@@ -76,14 +93,14 @@ void propigate(int i) {
 void change_state(void) {
 
   // Alter
-  double R = distribution(generator);
+  double R = rand0_1();
   for(int i=0; i<nsq; i++){
       replica[i] += R;
       if( replica[i] >= 1.0 )
         replica[i] -= 1.0;
   }
   //Seed site
-  int i = round(distribution(generator)*(nsq-1));
+  int i = randN(nsq);
 
   //Swap seed
   double tmp = replica[i];
@@ -94,25 +111,15 @@ void change_state(void) {
   traversed.clear();
 
 }
-// Saturation = 1
-// Lightness = 0.5
-double huetorgb(double t){
-  if(t < 0.0) t += 1.0;
-  if(t > 1.0) t -= 1.0;
-  if(t < 0.1666) return 6.0 * t;
-  if(t < 0.5) return 1.0;
-  if(t < 0.6666) return (0.6666 - t) * 6.0;
-  return 0.0;
-}
 
 void display_state(void) {
   int c = 0;
   glBegin(GL_TRIANGLES);
   for (int i = -n/2; i<n/2; i++){
     for (int j = -n/2; j<n/2; j++){
-      glColor3f(huetorgb(state[c] + 0.3333),
-                huetorgb(state[c]),
-                huetorgb(state[c] - 0.3333));
+      glColor3f(hueToRGB(state[c] + 0.3333),
+                hueToRGB(state[c]),
+                hueToRGB(state[c] - 0.3333));
       c++;
       //Make Square
       glVertex3f( (1+2*i)*w-w, (1+2*j)*w-w, 0.0);
@@ -150,10 +157,22 @@ void specialKeys(GLFWwindow* window, int key, int scancode, int action, int mods
 }
 //Main program
 int main(int argc, char **argv) {
+  // myfield[1] += 7.0;
+  // double value = myfield[1];
+  // std::cout << value;
 
+  mygraph.makeEdge(1,2);
+  mygraph.makeEdge(1,2);
+  mygraph.makeEdge(1,2);
+  mygraph.makeEdge(1,2);
+  mygraph.makeEdge(1,2);
+  mygraph.removeEdge(1,2);
+  mygraph.removeEdge(1,2);
+
+  mygraph.printGraph();
   //Initialize state
   for(int i=0; i<nsq; i++){
-      state[i] = distribution(generator);
+      state[i] = rand0_1();
   }
   replica = state;
 
@@ -167,7 +186,7 @@ int main(int argc, char **argv) {
       return -1;
 
   /* Create a windowed mode window and its OpenGL context */
-  window = glfwCreateWindow(640, 640, "Hello World", NULL, NULL);
+  window = glfwCreateWindow(640, 640, "State", NULL, NULL);
   if (!window)
   {
       glfwTerminate();
