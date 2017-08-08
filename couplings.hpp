@@ -36,6 +36,34 @@ namespace couplings{
       int m_size;
       std::map<std::pair<int, int>, double> m_map;
   };
+  class SquareCouplings: public GeneralCouplings {
+    public:
+      SquareCouplings(int t_n, const double h, bool periodic = true) : GeneralCouplings(t_n){
+        int w = std::sqrt(m_size);
+        if (periodic) {
+          for(int i = 0; i < m_size; i++){
+            this->couple(i, w*(i/w)+utils::mod( i+1, w), h);
+            this->couple(i, w*(i/w)+utils::mod( i-1, w), h);
+            this->couple(i, utils::mod( i+w, m_size), h);
+            this->couple(i, utils::mod( i-w, m_size), h);
+          }
+        }
+        else{
+          for(int i = 0; i < m_size; i++){
+            if( (i+1)%w != 0 ){
+              this->couple(i, w*(i/w)+utils::mod( i+1, w), h);
+            }
+            if( i%w != 0 ){
+              this->couple(i, w*(i/w)+utils::mod( i-1, w), h);
+            }
+            if( i+w < m_size ){
+              this->couple(i, utils::mod( i+w, m_size), h);
+            }
+            if( i-w > 0 ){
+              this->couple(i, utils::mod( i-w, m_size), h);
+            }
+          }
+        }
       }
   };
 }
