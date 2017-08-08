@@ -5,7 +5,7 @@ else
 endif
 
 CXX := g++
-CXXFLAGS := -std=c++14 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
+CXXFLAGS := -std=c++14 -O2 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
 INCLUDES := -I.
 LIBS := -L/usr/local/lib -lglfw
 
