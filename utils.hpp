@@ -22,6 +22,11 @@ namespace utils{
     if(t < 0.6666) return (0.6666 - t) * 6.0;
     return 0.0;
   }
+  int mod(int a, int b){
+    int c = a % b;
+    if (c < 0) c += b;
+    return c;
+  }
 }
 
 #endif
