@@ -27,6 +27,20 @@ namespace utils{
     if (c < 0) c += b;
     return c;
   }
+  struct node{
+    double spin;
+    int x;
+    int y;
+    int z;
+  };
+  node make_node(int x, int y, int z, double s){
+    utils::node new_node;
+    new_node.x = x;
+    new_node.y = y;
+    new_node.z = z;
+    new_node.spin = s;
+    return new_node;
+  }
 }
 
 #endif
