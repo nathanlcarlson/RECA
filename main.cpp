@@ -2,13 +2,24 @@
 
 #include "utils.hpp"
 #include "fields.hpp"
-#include "graph.hpp"
 #include "couplings.hpp"
 
-using namespace utils;
+//using namespace utils;
 using namespace fields;
 using namespace couplings;
 
+double a_coulping_energy(utils::node i,
+                         utils::node j){
+
+  //return 1.0;
+  return i.x * j.y - i.y * j.x;
+}
+double j_coulping_energy(utils::node i,
+                         utils::node j){
+
+  return 1.0;
+  //return i.x * j.y - i.y * j.x;
+}
 //Main program
 int main(int argc, char **argv) {
 
@@ -17,14 +28,19 @@ int main(int argc, char **argv) {
   // myfield[1] += 7.0;
   // double value = myfield[1];
   // std::cout << value;
-
-  int n_nodes = 16*16;
+  int w = 1<<4;
+  int n_nodes = w*w;
   GeneralField myfield(n_nodes, 10.0);
-  SquareCouplings mycouplings(n_nodes, 11.0, false);
-  //mycouplings.couple(3, 4, 5.0);
-  //mycouplings.couple(1, 2, 5.0);
-  //mycouplings.square_uniform(10.0, false);
-  mycouplings.print();
+  GeneralCouplings A(n_nodes, a_coulping_energy);
+  GeneralCouplings J(n_nodes, j_coulping_energy);
+  A.square2D(false);
+  J.square2D(false);
+
+  //mycouplings(0, 4) = 11.0;
+
+
+  A.print();
+  J.print();
 
   return 0;
 }
