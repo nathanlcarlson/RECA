@@ -33,12 +33,11 @@ namespace utils{
     int y;
     int z;
   };
-  node make_node(int x, int y, int z, double s){
+  node make_node(int x, int y, int z){
     utils::node new_node;
     new_node.x = x;
     new_node.y = y;
     new_node.z = z;
-    new_node.spin = s;
     return new_node;
   }
 }

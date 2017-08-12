@@ -11,7 +11,7 @@ namespace couplings{
   class GeneralCouplings {
     public:
       GeneralCouplings(int t_n, EnergyFunction_Ptr f)
-        : m_size(t_n), energy(f)
+        : m_size(t_n), m_energy(f)
       {
       }
 
@@ -34,17 +34,23 @@ namespace couplings{
             x = i%w;
             y = i/w;
             j = w*y + utils::mod( i+1, w );
-            m_map[std::make_pair(i,j)] = energy(
-              utils::make_node(x, y, 0, 0), utils::make_node(j%w, j/w, 0, 0));
+            m_map[std::make_pair(i,j)] = m_energy(
+              utils::make_node(x, y, 0, 0),
+              utils::make_node(j%w, j/w, 0)
+            );
             j = w*(y) + utils::mod( i-1, w );
-            m_map[std::make_pair(i,j)] = energy(
-              utils::make_node(x, y, 0, 0), utils::make_node(j%w, j/w, 0, 0));
+            m_map[std::make_pair(i,j)] = m_energy(
+              utils::make_node(x, y, 0, 0),
+              utils::make_node(j%w, j/w, 0)
+            );
             j = utils::mod( i+w, m_size );
-            m_map[std::make_pair(i,j)] = energy(
-              utils::make_node(x, y, 0, 0), utils::make_node(j%w, j/w, 0, 0));
+            m_map[std::make_pair(i,j)] = m_energy(
+              utils::make_node(x, y, 0, 0),
+              utils::make_node(j%w, j/w, 0));
             j = utils::mod( i-w, m_size );
-            m_map[std::make_pair(i,j)] = energy(
-              utils::make_node(x, y, 0, 0), utils::make_node(j%w, j/w, 0, 0));
+            m_map[std::make_pair(i,j)] = m_energy(
+              utils::make_node(x, y, 0, 0),
+              utils::make_node(j%w, j/w, 0));
           }
         }
         else{
@@ -53,23 +59,27 @@ namespace couplings{
             y = i/w;
             if( (i+1)%w != 0 ){
               j = w*y+utils::mod( i+1, w);
-              m_map[std::make_pair(i,j)] = energy(
-                utils::make_node(x, y, 0, 0), utils::make_node(j%w, j/w, 0, 0));
+              m_map[std::make_pair(i,j)] = m_energy(
+                utils::make_node(x, y, 0, 0),
+                utils::make_node(j%w, j/w, 0));
             }
             if( x != 0 ){
               j = w*y+utils::mod( i-1, w);
-              m_map[std::make_pair(i,j)] = energy(
-                utils::make_node(x, y, 0, 0), utils::make_node(j%w, j/w, 0, 0));
+              m_map[std::make_pair(i,j)] = m_energy(
+                utils::make_node(x, y, 0, 0),
+                utils::make_node(j%w, j/w, 0));
             }
             if( i+w < m_size ){
               j = utils::mod( i+w, m_size);
-              m_map[std::make_pair(i,j)] = energy(
-                utils::make_node(x, y, 0, 0), utils::make_node(j%w, j/w, 0, 0));
+              m_map[std::make_pair(i,j)] = m_energy(
+                utils::make_node(x, y, 0, 0),
+                utils::make_node(j%w, j/w, 0));
             }
             if( i-w >= 0 ){
               j = utils::mod( i-w, m_size);
-              m_map[std::make_pair(i,j)] = energy(
-                utils::make_node(x, y, 0, 0), utils::make_node(j%w, j/w, 0, 0));
+              m_map[std::make_pair(i,j)] = m_energy(
+                utils::make_node(x, y, 0),
+                utils::make_node(j%w, j/w, 0));
             }
           }
         }
@@ -81,7 +91,7 @@ namespace couplings{
           std::cout << "(" << it->first.first << ", " << it->first.second << ")" << " => " << it->second << '\n';
       }
     private:
-      EnergyFunction_Ptr energy;
+      EnergyFunction_Ptr m_energy;
       int m_size;
       std::map<std::pair<int, int>, double> m_map;
   };
