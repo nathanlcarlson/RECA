@@ -3,14 +3,13 @@
 
 #include <unordered_map>
 #include <functional>
-#include <tuple>
 #include "utils.hpp"
 
 namespace couplings{
-  typedef std::function<double( utils::node, utils::node )> EnergyFunction_Ptr;
+  typedef std::function<double( utils::node, utils::node )> CouplingEnergyFunction_Ptr;
   class StaticCouplings2D {
     public:
-      StaticCouplings2D(int t_n, EnergyFunction_Ptr t_f)
+      StaticCouplings2D(int t_n, CouplingEnergyFunction_Ptr t_f)
         : m_size(t_n), m_energy(t_f)
       {
         m_map.resize(t_n);
@@ -22,11 +21,8 @@ namespace couplings{
       void square2D( bool periodic = true ){
         int w = std::sqrt(m_size);
         int j;
-        int k;
         int x;
         int y;
-        utils::node inode;
-        utils::node jnode;
         if (periodic) {
           for(int i = 0; i < m_size; i++){
             x = i%w;
@@ -92,7 +88,7 @@ namespace couplings{
         }
       }
     private:
-      EnergyFunction_Ptr m_energy;
+      CouplingEnergyFunction_Ptr m_energy;
       int m_size;
       std::vector< std::unordered_map<int, double> > m_map;
   };
