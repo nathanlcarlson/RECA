@@ -8,7 +8,7 @@ CXX := g++
 CXXFLAGS := -std=c++14 -O2 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
 INCLUDES := -I.
 LIBS := -L/usr/local/lib -lglfw
-OBJS :=  main.o state.o algorithm.o couplings.o utils.o
+OBJS :=  main.o algorithm.o couplings.o utils.o
 
 ifeq ($(detected_OS),Windows)
     CXXFLAGS += -D WIN32

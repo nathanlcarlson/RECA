@@ -2,20 +2,16 @@
 #define ALGORITHM_HPP
 
 #include "state.hpp"
+template<class Algo>
 class State;
-class Algorithm {
-  public:
-    virtual ~Algorithm();
-    virtual void evolve_state();
-    virtual void setState(State* t_state);
-};
-class RECA : public Algorithm {
+
+class RECA {
   public:
     RECA();
-    virtual void evolve_state();
-    virtual void setState(State* t_state);
+    void evolve_state();
+    void setState(State<RECA>* t_state);
   private:
-    State* m_state;
+    State<RECA>* m_state;
     std::vector< double > m_replica;
     std::vector< int > m_traversed;
     int m_N;

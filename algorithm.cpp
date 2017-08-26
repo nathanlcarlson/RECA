@@ -1,16 +1,9 @@
 #include "algorithm.hpp"
 
-Algorithm::~Algorithm()
-{}
-void Algorithm::evolve_state()
-{}
-void Algorithm::setState(State* t_state)
-{}
-
 RECA::RECA()
 {}
 
-void RECA::setState(State* t_state){
+void RECA::setState(State<RECA>* t_state){
     m_state = t_state;
     m_N = m_state->size();
     m_w = std::sqrt(m_N);

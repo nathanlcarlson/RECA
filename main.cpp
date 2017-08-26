@@ -19,9 +19,12 @@ int n_nodes = n*n;
 double size = 0.8;
 double w = size/n;
 double beta = 0.0;
+
+
 StaticCouplings2D A(n_nodes, a_coulping_energy);
 StaticCouplings2D J(n_nodes, j_coulping_energy);
-State my_state(n_nodes, beta ,energy);
+RECA* my_algo = new RECA();
+State<RECA> my_state(n_nodes, beta ,energy, my_algo);
 
 double a_coulping_energy(node i,
                          node j){
@@ -85,19 +88,10 @@ int main(int argc, char **argv) {
 
   //For outliving declared scope
   //auto myfield = std::make_unique<GeneralField>(10, 11.1);
-  // myfield[1] += 7.0;
-  // double value = myfield[1];
-  // std::cout << value;
-  //A(1,2) = 1.0;
-  //A(2,1) = 3.0;
-  //GeneralField myfield(n_nodes, 10.0);
 
   // Set up couplings
   A.square2D(false);
   J.square2D(false);
-
-  //A.print();
-  //J.print();
 
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
