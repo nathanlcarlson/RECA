@@ -4,6 +4,7 @@ State::State(int t_n, int t_B, EnergyFunction_Ptr t_f, int t_A)
   : m_B(t_B), m_energy(t_f)
 {
   m_v.resize(t_n);
+  seedRand(100);
   std::generate( m_v.begin(), m_v.end(), rand0_1 );
 
   m_algorithm = new RECA( this );

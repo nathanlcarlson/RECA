@@ -1,10 +1,9 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include <chrono>
 #include <random>
+#include <iostream>
 
-std::mt19937 generator (std::chrono::system_clock::now().time_since_epoch().count());
 void seedRand( int s = 0 );
 double rand0_1();
 double randN( int n );

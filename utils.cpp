@@ -1,13 +1,15 @@
 #include "utils.hpp"
 
+std::mt19937 generator;
+
 void seedRand( int s ) {
-  generator.seed (s ? s : std::chrono::system_clock::now().time_since_epoch().count());
+  generator.seed(s);
 }
 double rand0_1() {
-  return std::uniform_real_distribution<double> (0.0, 1.0) (generator);
+  return std::uniform_real_distribution<double>(0.0, 1.0)(generator);
 }
 double randN( int n ) {
-  return std::uniform_int_distribution<int> (0, n-1)  (generator);
+  return std::uniform_int_distribution<int>(0, n-1)(generator);
 }
 double hueToRGB( double t ) {
   if(t < 0.0) t += 1.0;
