@@ -68,3 +68,53 @@ void RECA::propigate(int i) {
     q_swap(i, i+1);
   }
 }
+Metropolis::Metropolis()
+{}
+void Metropolis::setState(State<Metropolis>* t_state){
+    m_state = t_state;
+    m_N = m_state->size();
+    m_w = std::sqrt(m_N);
+}
+
+void Metropolis::evolve_state(){
+
+  double R = rand0_1();
+  int i = randN(m_N);
+  double initial = (*m_state)[i];
+
+  double E_i = 0;
+  double E_f = 0;
+  if( (i-m_w) >= 0 ){
+    E_i += m_state->energy(i, i-m_w);
+  }
+  if( (i+m_w) < m_N ){
+    E_i += m_state->energy(i, i+m_w);
+  }
+  if( ((i - 1) >= 0) && (((i - 1) % m_w) != (m_w-1)) ){
+    E_i += m_state->energy(i, i-1);
+  }
+  if( ((i + 1) < m_N) && (((i + 1) % m_w) != 0) ){
+    E_i += m_state->energy(i, i+1);
+  }
+
+  (*m_state)[i] = R;
+
+  if( (i-m_w) >= 0 ){
+    E_f += m_state->energy(i, i-m_w);
+  }
+  if( (i+m_w) < m_N ){
+    E_f += m_state->energy(i, i+m_w);
+  }
+  if( ((i - 1) >= 0) && (((i - 1) % m_w) != (m_w-1)) ){
+    E_f += m_state->energy(i, i-1);
+  }
+  if( ((i + 1) < m_N) && (((i + 1) % m_w) != 0) ){
+    E_f += m_state->energy(i, i+1);
+  }
+  double p = exp( -1*(m_state->m_B)*(E_f - E_i) );
+
+  if ( p < 1 && (1.0 - p) > rand0_1() ){
+    (*m_state)[i] = initial;
+  }
+
+}

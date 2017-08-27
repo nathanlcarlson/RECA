@@ -14,17 +14,20 @@ double energy(int i, int j);
 double rotate_y=0;
 double rotate_x=0;
 
-int n = 1<<7;
+int n = 1<<8;
 int n_nodes = n*n;
 double size = 0.8;
 double w = size/n;
-double beta = 0.0;
+double beta = 30.0;
 
 
 StaticCouplings2D A(n_nodes, a_coulping_energy);
 StaticCouplings2D J(n_nodes, j_coulping_energy);
-RECA* my_algo = new RECA();
-State<RECA> my_state(n_nodes, beta ,energy, my_algo);
+RECA* my_reca = new RECA();
+Metropolis* my_metro = new Metropolis();
+
+//State<RECA> my_state(n_nodes, beta ,energy, my_reca);
+State<Metropolis> my_state(n_nodes, beta ,energy, my_metro);
 
 double a_coulping_energy(node i,
                          node j){
@@ -114,18 +117,22 @@ int main(int argc, char **argv) {
   glfwMakeContextCurrent(window);
   glfwSetKeyCallback(window, specialKeys);
   /* Loop until the user closes the window */
-
+  int count = 0;
+  int n_steps = 1 << 12;
   while (!glfwWindowShouldClose(window))
   {
       /* Render here */
-
-      display_state();
-
       my_state.evolve_state();
+      count++;
+      if (count == n_steps){
+        display_state();
+        glfwSwapBuffers(window);
+        count = 0;
+      }
 
-      std::cout << my_state.m_B << std::endl;
+
+      //std::cout << my_state.m_B << std::endl;
       /* Swap front and back buffers */
-      glfwSwapBuffers(window);
 
       /* Poll for and process events */
       glfwPollEvents();

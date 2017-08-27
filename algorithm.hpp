@@ -21,4 +21,14 @@ class RECA {
     void q_swap(int i , int j);
     void propigate(int);
 };
+class Metropolis {
+  public:
+    Metropolis();
+    void evolve_state();
+    void setState(State<Metropolis>* t_state);
+  private:
+    State<Metropolis>* m_state;
+    int m_N;
+    int m_w;
+};
 #endif
