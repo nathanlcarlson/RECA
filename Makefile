@@ -7,7 +7,7 @@ endif
 CXX := g++
 CXXFLAGS := -std=c++14 -O2 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
 INCLUDES := -I.
-LIBS := -L/usr/local/lib -lglfw
+LIBS := -L/usr/local/lib
 OBJS :=  main.o algorithm.o couplings.o utils.o
 INSTALLDIR := ../
 TARGET := main
@@ -17,11 +17,11 @@ ifeq ($(detected_OS),Windows)
 endif
 ifeq ($(detected_OS),Darwin)  # Mac OS X
     CXXFLAGS += -D OSX
-	  LIBS += -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
+	  LIBS += -lglfw3 -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
 endif
 ifeq ($(detected_OS),Linux)
     CXXFLAGS += -D LINUX
-	  LIBS += -Wl,-rpath,/usr/local/lib -lGL
+	  LIBS += -Wl,-rpath,/usr/local/lib -lGL -lglfw
 endif
 
 $(TARGET): $(OBJS)
