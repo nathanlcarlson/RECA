@@ -6,7 +6,7 @@
 #include "couplings.hpp"
 #include "utils.hpp"
 #include "algorithm.hpp"
-class Algorithm;
+
 template<class Algo>
 class State{
   typedef std::function<double( int , int )> EnergyFunction_Ptr;
