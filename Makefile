@@ -6,7 +6,7 @@ endif
 
 CXX := g++
 CXXFLAGS := -std=c++14 -O2 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
-INCLUDES := -I.
+INCLUDES := -I/usr/local/include
 LIBS := -L/usr/local/lib
 OBJS :=  main.o algorithm.o couplings.o utils.o
 INSTALLDIR := ../
