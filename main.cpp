@@ -144,14 +144,14 @@ int main(int argc, char **argv) {
 
   //For outliving declared scope
   //auto myfield = std::make_unique<GeneralField>(10, 11.1);
-
-  // Set up couplings
+  
+  // Set up couplings  
   A.square2D(false);
   J.square2D(false);
 
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
-
+  //glEnable(GL_DEPTH_TEST);
+  //glDepthFunc(GL_LEQUAL);
+  
   GLFWwindow* window;
 
   // Initialize the library
