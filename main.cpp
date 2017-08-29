@@ -85,8 +85,8 @@ Metropolis* my_metro = new Metropolis();
 Wolff* my_wolff = new Wolff();
 
 //State<RECA> my_state(n_nodes, beta ,energy, my_reca);
-//State<Metropolis> my_state(n_nodes, beta ,energy, my_metro);
-State<Wolff> my_state(n_nodes, beta ,energy, my_wolff);
+State<Metropolis> my_state(n_nodes, beta ,energy, my_metro);
+//State<Wolff> my_state(n_nodes, beta ,energy, my_wolff);
 
 double a_coulping_energy(node i, node j){
 
