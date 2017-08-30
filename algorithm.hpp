@@ -112,4 +112,53 @@ class Metropolis {
     int m_N;
     int m_w;
 };
+// Note the Wolff algorithm doesn't work for this physical model and isn't properly implemented
+template<class Couplings>
+class Wolff {
+  public:
+    Wolff(Couplings* t_couplings)
+    : m_couplings{t_couplings}
+    {}
+    void evolve_state(){
+      double R = rand0_1();
+      int i = randN(m_N);
+      (*m_state)[i] = R;
+      propigate(i);
+      m_traversed.clear();
+    }
+    void setState(State<Wolff>* t_state){
+      m_state = t_state;
+      m_N = m_state->size();
+      m_w = std::sqrt(m_N);
+    }
+  private:
+    State<Wolff>* m_state;
+    Couplings* m_couplings;
+    std::vector<int> m_traversed;
+    int m_N;
+    int m_w;
+    bool in_m_traversed(int i) {
+      return std::find(m_traversed.begin(), m_traversed.end(), i) != m_traversed.end();
+    }
+    void q_swap(int i , int j){
+      double e1 = m_state->energy(i, j);
+      double init = (*m_state)[j];
+      (*m_state)[j] = (*m_state)[i];
+      if ((1 - exp( (m_state->m_B)*(m_state->energy(i, j) - e1) )) > rand0_1()){
+        propigate(j);
+      }
+      else{
+        (*m_state)[j] = init;
+      }
+    }
+    void propigate(int i){
+      for (auto it = m_couplings->begin(i); it != m_couplings->end(i); ++it){
+        int j = it->first;
+        if(!(in_m_traversed(j))){
+          m_traversed.push_back(j);
+          q_swap(i, j);
+        }
+      }
+    }
+};
 #endif
