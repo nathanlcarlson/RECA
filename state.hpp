@@ -7,13 +7,13 @@
 #include "utils.hpp"
 #include "algorithm.hpp"
 
-template<class Algo>
+template<class Algorithm>
 class State{
   typedef std::function<double( int , int )> EnergyFunction_Ptr;
   public:
     double m_B;
 
-    State(int t_n, int t_B, EnergyFunction_Ptr t_f, Algo* t_algorithm)
+    State(int t_n, int t_B, EnergyFunction_Ptr t_f, Algorithm* t_algorithm)
       : m_B(t_B), m_energy(t_f)
     {
       m_v.resize(t_n);
@@ -50,7 +50,7 @@ class State{
 
   private:
     EnergyFunction_Ptr m_energy;
-    Algo* m_algorithm;
+    Algorithm* m_algorithm;
     std::vector<double> m_v;
 };
 #endif
