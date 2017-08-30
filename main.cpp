@@ -10,6 +10,8 @@
 double a_coulping_energy(node i, node j);
 double j_coulping_energy(node i, node j);
 double energy(int i, int j);
+// The Wolff algorithm is here to show that an algorithm can be written and implemented from here
+// Also note the Wolff algorithm doesn't work for this physical model and isn't properly implemented
 template<class Couplings>
 class Wolff {
   public:
