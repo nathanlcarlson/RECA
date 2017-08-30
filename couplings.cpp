@@ -73,10 +73,16 @@ void StaticCouplings2D::square2D( bool periodic ){
 }
 void StaticCouplings2D::print(){
   int c = 0;
-  for (std::vector<std::unordered_map<int, double>>::iterator it = m_map.begin() ;  it != m_map.end(); ++it){
+  for (CouplingsMap::iterator it = m_map.begin() ;  it != m_map.end(); ++it){
     for (auto& x: (*it)) {
       std::cout << "( "<< c << ", " << x.first << " ) => " << x.second << std::endl;
     }
     c++;
   }
+}
+Neighbors::iterator StaticCouplings2D::begin(int i){
+  return m_map[i].begin();
+}
+Neighbors::iterator StaticCouplings2D::end(int i){
+  return m_map[i].end();
 }

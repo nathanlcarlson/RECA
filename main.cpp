@@ -10,10 +10,13 @@
 double a_coulping_energy(node i, node j);
 double j_coulping_energy(node i, node j);
 double energy(int i, int j);
-
+// The Wolff algorithm is here to show that an algorithm can be written and implemented from here
+// Also note the Wolff algorithm doesn't work for this physical model and isn't properly implemented
+template<class Couplings>
 class Wolff {
   public:
-    Wolff()
+    Wolff(Couplings* t_couplings)
+    : m_couplings{t_couplings}
     {}
     void evolve_state(){
       double R = rand0_1();
@@ -29,6 +32,7 @@ class Wolff {
     }
   private:
     State<Wolff>* m_state;
+    Couplings* m_couplings;
     std::vector<int> m_traversed;
     int m_N;
     int m_w;
@@ -46,31 +50,19 @@ class Wolff {
         (*m_state)[j] = init;
       }
     }
-    void propigate(int i) {
-      if( (i-m_w) >= 0 && !(in_m_traversed(i-m_w))){
-        m_traversed.push_back(i-m_w);
-        q_swap(i, i-m_w);
-      }
-      if( (i+m_w) < m_N && !(in_m_traversed(i+m_w))){
-        m_traversed.push_back(i+m_w);
-        q_swap(i, i+m_w);
-      }
-      if( ((i - 1) >= 0) && (((i - 1) % m_w) != (m_w-1)) && !(in_m_traversed(i-1)) ){
-        m_traversed.push_back(i-1);
-        q_swap(i, i-1);
-      }
-      if( ((i + 1) < m_N) && (((i + 1) % m_w) != 0) && !(in_m_traversed(i+1))){
-        m_traversed.push_back(i+1);
-        q_swap(i, i+1);
+    void propigate(int i){
+      for (auto it = m_couplings->begin(i); it != m_couplings->end(i); ++it){
+        int j = it->first;
+        if(!(in_m_traversed(j))){
+          m_traversed.push_back(j);
+          q_swap(i, j);
+        }
       }
     }
 };
 
-double rotate_y=0;
-double rotate_x=0;
-
 // The width of our 2D square and total number of nodes
-int n = 1<<6;
+int n = 1<<7;
 int n_nodes = n*n;
 // Display parameters
 double size = 0.8;
@@ -78,15 +70,19 @@ double w = size/n;
 // Physical parameter of system
 double beta = 30.0;
 
+// Couplings used to calculate energy
 StaticCouplings2D A(n_nodes, a_coulping_energy);
 StaticCouplings2D J(n_nodes, j_coulping_energy);
-RECA* my_reca = new RECA();
-Metropolis* my_metro = new Metropolis();
-Wolff* my_wolff = new Wolff();
 
-//State<RECA> my_state(n_nodes, beta ,energy, my_reca);
-//State<Metropolis> my_state(n_nodes, beta ,energy, my_metro);
-State<Wolff> my_state(n_nodes, beta ,energy, my_wolff);
+// Choices of algorithms, use info from couplings
+RECA<StaticCouplings2D>* my_reca = new RECA<StaticCouplings2D>(&A);
+Wolff<StaticCouplings2D>* my_wolff = new Wolff<StaticCouplings2D>(&A);
+Metropolis<StaticCouplings2D>* my_metro = new Metropolis<StaticCouplings2D>(&A);
+
+// For now, comment out whatever algorithms will not be used
+//State< RECA<StaticCouplings2D> > my_state(n_nodes, beta ,energy, my_reca);
+State< Metropolis<StaticCouplings2D> > my_state(n_nodes, beta ,energy, my_metro);
+//State< Wolff<StaticCouplings2D> > my_state(n_nodes, beta ,energy, my_wolff);
 
 double a_coulping_energy(node i, node j){
 
@@ -102,12 +98,7 @@ double energy(int i, int j) {
 }
 
 void display_state(void) {
-  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-  // Reset transformations
-  glLoadIdentity();
-  // Rotate when user changes rotate_x and rotate_y
-  glRotatef( rotate_x, 1.0, 0.0, 0.0 );
-  glRotatef( rotate_y, 0.0, 1.0, 0.0 );
+  glClear(GL_COLOR_BUFFER_BIT);
   int c = 0;
   for (int i = -n/2; i<n/2; i++){
     for (int j = -n/2; j<n/2; j++){
@@ -134,23 +125,13 @@ void specialKeys(GLFWwindow* window, int key, int scancode, int action, int mods
     my_state.m_B += 0.1;
   else if (key == GLFW_KEY_LEFT)
     my_state.m_B -= 0.1;
-  else if (key == GLFW_KEY_UP)
-    rotate_x += 5;
-  else if (key == GLFW_KEY_DOWN)
-    rotate_x -= 5;
 }
 
 int main(int argc, char **argv) {
 
-  //For outliving declared scope
-  //auto myfield = std::make_unique<GeneralField>(10, 11.1);
-
   // Set up couplings
   A.square2D(false);
   J.square2D(false);
-
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
 
   GLFWwindow* window;
 
@@ -172,7 +153,7 @@ int main(int argc, char **argv) {
   // Loop until the user closes the window
   // Only render every 2^n steps
   int count = 0;
-  int n_steps = 1 << 6;
+  int n_steps = 1 << 7;
   while (!glfwWindowShouldClose(window))
   {
       // Step the state forward
