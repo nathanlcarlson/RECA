@@ -2,7 +2,7 @@
 
 
 StaticCouplings2D::StaticCouplings2D(int t_n, CouplingEnergyFunction_Ptr t_f)
-  : m_size(t_n), m_energy(t_f)
+  : m_energy(t_f), m_size(t_n)
 {
 	m_map.resize(t_n);
 }

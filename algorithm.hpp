@@ -26,6 +26,7 @@ public:
 		}
 		int i = randN(m_N);
 		swap(i);
+    m_traversed.push_back(i);
 		propigate(i);
 		m_traversed.clear();
 	}
@@ -38,7 +39,7 @@ public:
 		m_replica.resize(m_N);
 		for (int i = 0; i < m_N; i++)
 		{
-			m_replica[i] = (*m_state)[i];
+      m_replica[i] = rand0_1();//(*m_state)[i];
 		}
 	}
 	double total_energy()
