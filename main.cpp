@@ -12,7 +12,7 @@ double j_coulping_energy(node i, node j);
 double energy(int i, int j);
 
 // The width of our 2D square and total number of nodes
-int n = 1 << 9;
+int n = 1 << 7;
 int n_nodes = n * n;
 // Display parameters
 double size = 0.8;
@@ -122,12 +122,14 @@ int main(int argc, char **argv)
 	while (!glfwWindowShouldClose(window))
 	{
 		// Step the state forward
-		my_state.evolve_state();
+    //my_state.evolve_state();
+		my_reca->evolve_state();
 
 		count++;
 		if (count == n_steps)
 		{
 			display_state();
+      std::cout << my_reca->total_energy() << std::endl;
 			// Swap front and back buffers
 			glfwSwapBuffers(window);
 			count = 0;
