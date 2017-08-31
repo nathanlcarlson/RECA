@@ -227,5 +227,17 @@ private:
 			}
 		}
 	}
+	double total_energy()
+	{
+		double E = 0;
+		for(int i = 0; i < m_N; i++)
+		{
+			for (auto it = m_couplings->begin(i); it != m_couplings->end(i); ++it)
+			{
+				E += m_state->energy(i, it->first);
+			}
+		}
+		return E;
+	}
 };
 #endif
