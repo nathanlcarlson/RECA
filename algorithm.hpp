@@ -1,9 +1,41 @@
 #ifndef ALGORITHM_HPP
 #define ALGORITHM_HPP
 
+#include <limits>
 #include "state.hpp"
+
 template <class Algo>
 class State;
+
+class Cluster
+{
+public:
+	Cluster(int t_N)
+	{
+		m_current = std::numeric_limits<unsigned int>::max() - 1;
+		m_cluster.resize(t_N);
+	}
+	bool contains(int i)
+	{
+		return m_cluster[i] == m_current;
+	}
+	void add(int i)
+	{
+		m_cluster[i] = m_current;
+	}
+	void clear()
+	{
+		m_current -= 1;
+		if(m_current == 0)
+		{
+			m_current = std::numeric_limits<unsigned int>::max() - 1;
+			std::fill(m_cluster.begin(), m_cluster.end(), -1);
+		}
+	}
+private:
+	std::vector< unsigned int > m_cluster;
+	unsigned int m_current;
+};
 
 template <class Couplings>
 class RECA
@@ -26,9 +58,9 @@ public:
 		}
 		int i = randN(m_N);
 		swap(i);
-    m_traversed.push_back(i);
+    m_cluster->add(i);
 		propigate(i);
-		m_traversed.clear();
+		m_cluster->clear();
 	}
 
 	void setState(State <RECA> *t_state)
@@ -41,6 +73,7 @@ public:
 		{
       m_replica[i] = rand0_1();//(*m_state)[i];
 		}
+		m_cluster = new Cluster(m_N);
 	}
 	double total_energy()
 	{
@@ -58,14 +91,10 @@ public:
 private:
 	State <RECA> *m_state;
 	Couplings *m_couplings;
+	Cluster *m_cluster;
 	std::vector <double> m_replica;
-	std::vector <int> m_traversed;
 	int m_N;
 	int m_w;
-	bool in_m_traversed(int i)
-	{
-		return std::find(m_traversed.begin(), m_traversed.end(), i) != m_traversed.end();
-	}
 
 	void swap(int j)
 	{
@@ -95,9 +124,9 @@ private:
 		for (auto it = m_couplings->begin(i); it != m_couplings->end(i); ++it)
 		{
 			int j = it->first;
-			if (!(in_m_traversed(j)))
+			if (!(m_cluster->contains(j)))
 			{
-				m_traversed.push_back(j);
+				m_cluster->add(j);
 				q_swap(i, j);
 			}
 		}
