@@ -12,7 +12,7 @@ double j_coulping_energy(node i, node j);
 double energy(int i, int j);
 
 // The width of our 2D square and total number of nodes
-int n = 1 << 10;
+int n = 1 << 8;
 int n_nodes = n * n;
 // Display parameters
 double size = 0.8;
@@ -23,16 +23,12 @@ double beta = 30.0;
 // Couplings used to calculate energy
 StaticCouplings2D A(n_nodes, a_coulping_energy);
 StaticCouplings2D J(n_nodes, j_coulping_energy);
+State my_state(n_nodes, beta, energy);
 
 // Choices of algorithms, use info from couplings
-RECA <StaticCouplings2D> *my_reca = new RECA <StaticCouplings2D>(&A);
-Wolff <StaticCouplings2D> *my_wolff = new Wolff <StaticCouplings2D>(&A);
-Metropolis <StaticCouplings2D> *my_metro = new Metropolis <StaticCouplings2D>(&A);
-
-// For now, comment out whatever algorithms will not be used
-State <RECA <StaticCouplings2D> > my_state(n_nodes, beta, energy, my_reca);
-//State< Metropolis<StaticCouplings2D> > my_state(n_nodes, beta ,energy, my_metro);
-//State< Wolff<StaticCouplings2D> > my_state(n_nodes, beta ,energy, my_wolff);
+RECA <StaticCouplings2D> *my_reca = new RECA <StaticCouplings2D>( &my_state, &A );
+//Wolff <StaticCouplings2D> *my_wolff = new Wolff <StaticCouplings2D>(&A, &my_state);
+Metropolis <StaticCouplings2D> *my_metro = new Metropolis <StaticCouplings2D>( &my_state, &A );
 
 double a_coulping_energy(node i, node j)
 {
@@ -122,8 +118,7 @@ int main(int argc, char **argv)
 	while (!glfwWindowShouldClose(window))
 	{
 		// Step the state forward
-    my_state.evolve_state();
-		//my_reca->evolve_state();
+    my_reca->evolve_state();
 
 		count++;
 		if (count == n_steps)
