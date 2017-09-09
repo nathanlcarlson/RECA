@@ -4,8 +4,6 @@
 #include <limits>
 #include "state.hpp"
 
-class State;
-
 class Cluster
 {
 public:
