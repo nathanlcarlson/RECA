@@ -32,3 +32,6 @@ install:
 	install $(TARGET) $(INSTALLDIR)
 clean:
 	-rm *.o
+
+experiment:
+	$(CXX) $(INCLUDES) $(CXXFLAGS) experiment.cpp -o experiment
