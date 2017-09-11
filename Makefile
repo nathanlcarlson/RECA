@@ -8,7 +8,7 @@ CXX := g++
 CXXFLAGS := -std=c++14 -O2 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
 INCLUDES := -I/usr/local/include
 LIBS := -L/usr/local/lib
-OBJS :=  main.o algorithm.o couplings.o utils.o
+OBJS :=  main.o couplings.o utils.o
 INSTALLDIR := ../
 TARGET := main
 
@@ -32,3 +32,6 @@ install:
 	install $(TARGET) $(INSTALLDIR)
 clean:
 	-rm *.o
+
+experiment:
+	$(CXX) $(INCLUDES) $(CXXFLAGS) experiment.cpp -o experiment
