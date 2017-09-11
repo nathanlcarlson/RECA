@@ -6,13 +6,13 @@
 #include <time.h>
 
 // Number of spins a node can have
-int N = 4;
+int N = 7;
 // Number of nodes in the state, thus including the replica there are 2L nodes
 int L = 3;
 // Total number of states
 int N_states = pow(N, 2*L);
 // Minimum number of bits required to represent N
-int bits = ceil(log(N));
+int bits = floor(log(N)/log(2) + 1);
 
 int rand0_N(){
   return rand()%N;
