@@ -6,13 +6,13 @@
 #include <time.h>
 
 // Number of spins a node can have
-int N = 7;
+int N = 8;
 // Number of nodes in the state, thus including the replica there are 2L nodes
 int L = 3;
 // Total number of states
 int N_states = pow(N, 2*L);
-// Minimum number of bits required to represent N
-int bits = floor(log(N)/log(2) + 1);
+// Minimum number of bits required to represent N spins
+int bits = ceil(log(N)/log(2));
 
 int rand0_N(){
   return rand()%N;
@@ -43,9 +43,10 @@ int main(int argc, char **argv){
     //   s[rand()%L] = rand()%N;
     // }
     // Global transformation
+    int R = rand()%(N-1);
 		for (int i = 0; i < L; i++)
 		{
-			u[i] = (u[i] + 1)%N;
+			u[i] = (u[i] + R)%N;
 		}
 
     // Swap between state and replica
@@ -64,6 +65,7 @@ int main(int argc, char **argv){
 
     // Check states reached
     int state = 0;
+    // Create bit string
     for (int j = 0; j < L; j++)
 		{
       std::cout << (u[j] << j*bits) << ' ';
