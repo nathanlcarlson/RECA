@@ -139,7 +139,15 @@ public:
 	}
 	void evolve_state()
 	{
-		double R = rand0_1();
+		double R;
+		if(m_state->N == 1.0)
+		{
+			R = rand0_1();
+		}
+		else
+		{
+			R = randN( m_state->N )/( m_state->N );
+		}
 		int i = randN(m_N);
 		double initial = (*m_state)[i];
 		double E_i = 0;

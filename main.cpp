@@ -14,6 +14,7 @@ double energy(int i, int j);
 // The width of our 2D square and total number of nodes
 int n = 1 << 8;
 int n_nodes = n * n;
+double N_states = 200.0;
 // Display parameters
 double size = 0.8;
 double w = size / n;
@@ -23,7 +24,7 @@ double beta = 30.0;
 // Couplings used to calculate energy
 StaticCouplings2D A(n_nodes, a_coulping_energy);
 StaticCouplings2D J(n_nodes, j_coulping_energy);
-State my_state(n_nodes, beta, energy);
+State my_state(n_nodes, beta, energy, N_states);
 
 // Choices of algorithms, use info from couplings
 RECA <StaticCouplings2D> *my_reca = new RECA <StaticCouplings2D>( &my_state, &A );
@@ -118,13 +119,13 @@ int main(int argc, char **argv)
 	while (!glfwWindowShouldClose(window))
 	{
 		// Step the state forward
-    my_reca->evolve_state();
+    my_metro->evolve_state();
 
 		count++;
 		if (count == n_steps)
 		{
 			display_state();
-      //std::cout << my_reca->total_energy() << std::endl;
+      //std::cout << my_metro->total_energy() << std::endl;
 			// Swap front and back buffers
 			glfwSwapBuffers(window);
 			count = 0;

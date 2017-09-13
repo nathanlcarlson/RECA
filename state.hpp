@@ -11,13 +11,26 @@ class State
 typedef std::function <double (int, int)> EnergyFunction_Ptr;
 public:
 	double B;
-
-	State(int t_n, int t_B, EnergyFunction_Ptr t_f)
+	double N;
+	State(int t_L, int t_B, EnergyFunction_Ptr t_f, double t_N = 1.0)
 		: B(t_B), m_energy(t_f)
 	{
-		m_v.resize(t_n);
+		N = t_N;
+		m_v.resize(t_L);
 		seedRand(100);
-		std::generate(m_v.begin(), m_v.end(), rand0_1);
+		if(t_N == 1.0)
+		{
+			std::generate( m_v.begin(), m_v.end(), rand0_1 );
+		}
+		else
+		{
+
+			for(int i = 0; i < t_L; i++){
+				double r = randN(t_N)/t_N;
+				std::cout << r << std::endl;
+				m_v[i] = r;
+			}
+		}
 	}
 
 	double energy(int i, int j)
