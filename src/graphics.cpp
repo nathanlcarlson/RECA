@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <math.h>
 #include <GLFW/glfw3.h>
 #include "utils.hpp"
@@ -12,7 +13,7 @@ double j_coulping_energy(node i, node j);
 double energy(int i, int j);
 
 // The width of our 2D square and total number of nodes
-int n = 1 << 8;
+int n = 1 << 7;
 int n_nodes = n * n;
 // Display parameters
 double size = 0.8;
@@ -20,15 +21,15 @@ double w = size / n;
 // Physical parameter of system
 double beta = 30.0;
 
+typedef StaticCouplings2D Bonds;
 // Couplings used to calculate energy
-StaticCouplings2D A(n_nodes, a_coulping_energy);
-StaticCouplings2D J(n_nodes, j_coulping_energy);
+Bonds A(n_nodes, a_coulping_energy);
+Bonds J(n_nodes, j_coulping_energy);
 State my_state(n_nodes, beta, energy);
 
 // Choices of algorithms, use info from couplings
-RECA <StaticCouplings2D> *my_reca = new RECA <StaticCouplings2D>( &my_state, &A );
-//Wolff <StaticCouplings2D> *my_wolff = new Wolff <StaticCouplings2D>(&A, &my_state);
-Metropolis <StaticCouplings2D> *my_metro = new Metropolis <StaticCouplings2D>( &my_state, &A );
+auto my_reca = std::unique_ptr<RECA<Bonds>>(new RECA<Bonds>( &my_state, &A ));
+auto my_metro = std::unique_ptr<Metropolis<Bonds>>(new Metropolis<Bonds>( &my_state, &A ));
 
 double a_coulping_energy(node i, node j)
 {
@@ -112,22 +113,21 @@ int main(int argc, char **argv)
 	glfwSetKeyCallback(window, specialKeys);
 
 	// Loop until the user closes the window
-	// Only render every 2^10 steps
-	int count = 0;
-	int n_steps = 1 << 10;
+	// Only render according to interval
+	int interval = 1 << 10;
+	int count = interval;
+
 	while (!glfwWindowShouldClose(window))
 	{
 		// Step the state forward
-    my_reca->evolve_state();
-
-		count++;
-		if (count == n_steps)
+		my_metro->evolve_state();
+		count--;
+		if (count == 0)
 		{
 			display_state();
-      //std::cout << my_reca->total_energy() << std::endl;
-			// Swap front and back buffers
 			glfwSwapBuffers(window);
-			count = 0;
+			count = interval;
+
 		}
 		// Poll for and process events
 		glfwPollEvents();

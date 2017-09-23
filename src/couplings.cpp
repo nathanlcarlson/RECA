@@ -5,6 +5,7 @@ StaticCouplings2D::StaticCouplings2D(int t_n, CouplingEnergyFunction_Ptr t_f)
   : m_energy(t_f), m_size(t_n)
 {
 	m_map.resize(t_n);
+  m_neighbors.resize(t_n);
 }
 
 double&StaticCouplings2D::operator()(int t_i, int t_j)
@@ -79,6 +80,7 @@ void StaticCouplings2D::square2D(bool periodic)
 			}
 		}
 	}
+  save_couplings();
 }
 
 void StaticCouplings2D::print()
@@ -94,13 +96,23 @@ void StaticCouplings2D::print()
 		c++;
 	}
 }
-
-Neighbors::iterator StaticCouplings2D::begin(int i)
+void StaticCouplings2D::save_couplings()
 {
-	return m_map[i].begin();
+  for(int i = 0; i < m_size; i++)
+  {
+    for (auto it = m_map[i].begin(); it != m_map[i].end(); ++it)
+    {
+      m_neighbors[i].push_back(it->first);
+    }
+    m_neighbors[i].shrink_to_fit();
+  }
+}
+Neighborhood::iterator StaticCouplings2D::begin(int i)
+{
+	return m_neighbors[i].begin();
 }
 
-Neighbors::iterator StaticCouplings2D::end(int i)
+Neighborhood::iterator StaticCouplings2D::end(int i)
 {
-	return m_map[i].end();
+	return m_neighbors[i].end();
 }

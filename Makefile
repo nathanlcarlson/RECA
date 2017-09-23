@@ -1,37 +1,32 @@
-ifeq ($(OS),Windows_NT)
-    detected_OS := Windows
-else
-    detected_OS := $(shell uname -s)
-endif
-
 CXX := g++
-CXXFLAGS := -std=c++14 -O2 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
-INCLUDES := -I/usr/local/include
+CXXFLAGS := -std=c++11 -O2 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
+INCLUDES := -I/usr/local/include -I.
 LIBS := -L/usr/local/lib
-OBJS :=  main.o couplings.o utils.o
-INSTALLDIR := ../
-TARGET := main
+OBJS :=  obj/couplings.o obj/utils.o
+HPP := $(wildcard src/*.hpp)
 
-ifeq ($(detected_OS),Windows)
-    CXXFLAGS += -D WIN32
-endif
+detected_OS := $(shell uname -s)
 ifeq ($(detected_OS),Darwin)  # Mac OS X
     CXXFLAGS += -D OSX
-	  LIBS += -lglfw3 -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
+		GLIBS := $(LIBS) -lglfw3 -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
 endif
 ifeq ($(detected_OS),Linux)
     CXXFLAGS += -D LINUX
-	  LIBS += -Wl,-rpath,/usr/local/lib -lGL -lglfw
+	  GLIBS += $(LIBS) -lGL -lglfw -Wl,-rpath,/usr/local/lib
 endif
 
-$(TARGET): $(OBJS)
-	$(CXX) $(INCLUDES) $(OBJS) -o main $(LIBS)
-main.o: main.cpp state.hpp algorithm.hpp couplings.hpp utils.hpp
-	$(CXX) $(INCLUDES) $(CXXFLAGS) -c main.cpp  -o main.o
-install:
-	install $(TARGET) $(INSTALLDIR)
-clean:
-	-rm *.o
+graphics: $(OBJS) obj/graphics.o
+	$(CXX) $(INCLUDES) -o $@ $^ $(GLIBS)
+reca: $(OBJS) obj/reca.o
+	$(CXX) $(INCLUDES) -o $@ $^ $(LIBS)
+obj/%.o: src/%.cpp $(HPP)
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
 
 experiment:
-	$(CXX) $(INCLUDES) $(CXXFLAGS) experiment.cpp -o experiment
+	$(CXX) $(INCLUDES) $(CXXFLAGS) src/experiment.cpp -o experiment
+
+clean:
+	-rm -f obj/*.o
+	-rm -f graphics
+	-rm -f reca
+	-rm -f experiment
