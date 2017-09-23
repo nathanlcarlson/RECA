@@ -123,6 +123,7 @@ int main(int argc, char **argv)
 		count--;
 		if (count == 0)
 		{
+			display_state();
 			glfwSwapBuffers(window);
 			count = interval;
 		}
