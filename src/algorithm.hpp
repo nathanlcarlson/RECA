@@ -43,26 +43,16 @@ public:
 	{
 		m_state = t_state;
 		m_N = m_state->size();
-		m_w = std::sqrt(m_N);
 		m_replica.resize(m_N);
 		for (int i = 0; i < m_N; i++)
 		{
-			m_replica[i] = rand0_1();//(*m_state)[i];
+			m_replica[i] = rand0_1();
 		}
 		m_cluster = new Cluster(m_N);
 	}
 	void evolve_state()
 	{
-		double R = rand0_1();
-
-		for (int i = 0; i < m_N; i++)
-		{
-			(*m_state)[i] += R;
-			if ((*m_state)[i] >= 1.0)
-			{
-				(*m_state)[i] -= 1.0;
-			}
-		}
+		m_state->shift_all();
 		int i = randN(m_N);
 		swap(i);
     m_cluster->add(i);
@@ -89,7 +79,6 @@ private:
 	Cluster *m_cluster;
 	std::vector <double> m_replica;
 	int m_N;
-	int m_w;
 
 	void swap(int j)
 	{
@@ -100,10 +89,10 @@ private:
 
 	void q_swap(int i, int j)
 	{
-		double e1 = m_state->energy(i, j);
-
+		double E_i = m_state->energy(i, j);
 		swap(j);
-		if ((1 - exp((m_state->B) * (m_state->energy(i, j) - e1))) > rand0_1())
+		double E_f = m_state->energy(i, j);
+		if ((1 - exp((m_state->B) * (E_f - E_i))) > rand0_1())
 		{
 			propigate(j);
 		}
@@ -134,23 +123,12 @@ public:
 		: m_couplings( t_couplings )
 	{
 		m_state = t_state;
-		m_N = m_state->size();
-		m_w = std::sqrt(m_N);
+		m_L = m_state->size();
 	}
 	void evolve_state()
 	{
-		// Get new random value, either continuous 0 to 1 or discrete
-		double R;
-		if(m_state->N == 1.0)
-		{
-			R = rand0_1();
-		}
-		else
-		{
-			R = randN( m_state->N )/( m_state->N );
-		}
 		// Select site to propose change
-		int i = randN(m_N);
+		int i = randN(m_L);
 		double initial = (*m_state)[i];
 		double E_i = 0;
 		double E_f = 0;
@@ -163,7 +141,7 @@ public:
 		}
 
 		// Make change
-		(*m_state)[i] = R;
+		m_state->randomize_one(i);
 
 		// Calculate new energy
 		for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor)
@@ -173,7 +151,7 @@ public:
 		}
 
 		// Accept change?
-		double p = exp(-1 * (m_state->B) * (E_f - E_i));
+		double p = exp((m_state->B) * (E_i - E_f));
 
 		if (p < 1 && (1.0 - p) > rand0_1())
 		{
@@ -185,7 +163,7 @@ public:
 	double total_energy()
 	{
 		double E = 0;
-		for(int i = 0; i < m_N; i++)
+		for(int i = 0; i < m_L; i++)
 		{
 			for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor)
 			{
@@ -198,7 +176,6 @@ public:
 private:
 	State *m_state;
 	Couplings *m_couplings;
-	int m_N;
-	int m_w;
+	int m_L;
 };
 #endif

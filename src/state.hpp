@@ -12,32 +12,70 @@ class State
 typedef std::function <double (int, int)> EnergyFunction_Ptr;
 public:
 	double B;
-	double N;
-	State(int t_L, int t_B, EnergyFunction_Ptr t_f, double t_N = 1.0)
-		: B(t_B), m_energy(t_f)
+	State(int t_L, int t_B, EnergyFunction_Ptr t_f, int t_N = 1)
+		: B(t_B), m_energy(t_f), m_N(t_N)
 	{
-		N = t_N;
 		m_v.resize(t_L);
 		seedRand( time(NULL) );
-		if(t_N == 1.0)
-		{
-			std::generate( m_v.begin(), m_v.end(), rand0_1 );
-		}
-		else
-		{
-			for(int i = 0; i < t_L; i++){
-				double r = randN(t_N)/t_N;
-				//std::cout << r << std::endl;
-				m_v[i] = r;
-			}
-		}
+		randomize_all();
 	}
 
 	double energy(int i, int j)
 	{
 		return m_energy(i, j);
 	}
-
+	void shift_all()
+	{
+		double r;
+		if(m_N == 1)
+		{
+			r = rand0_1();
+		}
+		else
+		{
+			r = randN(m_N)/(double)m_N;
+		}
+		int n = m_v.size();
+		for (int i = 0; i < n; i++)
+		{
+			m_v[i] += r;
+			if (m_v[i] >= 1.0)
+			{
+				m_v[i] -= 1.0;
+			}
+		}
+	}
+	void randomize_all()
+	{
+		if(m_N == 1)
+		{
+			std::generate( m_v.begin(), m_v.end(), rand0_1 );
+		}
+		else
+		{
+			int n = m_v.size();
+			for(int i = 0; i < n; i++){
+				double r = randN(m_N)/(double)m_N;
+				m_v[i] = r;
+			}
+		}
+	}
+	int randomize_one(int i = -1)
+	{
+		if(i == -1)
+		{
+			i = randN(m_v.size());
+		}
+		if(m_N == 1)
+		{
+			m_v[i] = rand0_1();
+		}
+		else
+		{
+			m_v[i] = randN(m_N)/(double)m_N;
+		}
+		return i;
+	}
 	void print()
 	{
 		std::cout << "State contains:";
@@ -78,5 +116,6 @@ private:
 	EnergyFunction_Ptr m_energy;
 	std::vector <double> m_v;
 	std::vector <double> m_saved;
+	double m_N;
 };
 #endif

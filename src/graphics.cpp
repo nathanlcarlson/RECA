@@ -14,7 +14,7 @@ double energy(int i, int j);
 // The width of our 2D square and total number of nodes
 int n = 1 << 7;
 int n_nodes = n * n;
-double N_states = 200.0;
+int N_states = 200;
 // Display parameters
 double size = 0.8;
 double w = size / n;
@@ -119,13 +119,21 @@ int main(int argc, char **argv)
 	while (!glfwWindowShouldClose(window))
 	{
 		// Step the state forward
-    my_metro->evolve_state();
+		if(rand()%100 < 25)
+		{
+			my_metro->evolve_state();
+		}
+		else
+		{
+			my_reca->evolve_state();		
+		}
 		count--;
 		if (count == 0)
 		{
 			display_state();
 			glfwSwapBuffers(window);
 			count = interval;
+
 		}
 		// Poll for and process events
 		glfwPollEvents();

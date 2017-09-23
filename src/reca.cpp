@@ -13,7 +13,7 @@ double energy(int i, int j);
 // The width of our 2D square and total number of nodes
 int n = 1 << 8;
 int n_nodes = n * n;
-double N_states = 200.0;
+int N_states = 200;
 // Physical parameter of system
 double beta = 30.0;
 
