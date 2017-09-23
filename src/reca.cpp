@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <math.h>
 #include "utils.hpp"
 #include "couplings.hpp"
@@ -13,18 +14,18 @@ double energy(int i, int j);
 // The width of our 2D square and total number of nodes
 int n = 1 << 8;
 int n_nodes = n * n;
-int N_states = 200;
 // Physical parameter of system
 double beta = 30.0;
 
+typedef StaticCouplings2D Bonds;
 // Couplings used to calculate energy
-StaticCouplings2D A(n_nodes, a_coulping_energy);
-StaticCouplings2D J(n_nodes, j_coulping_energy);
-State my_state(n_nodes, beta, energy, N_states);
+Bonds A(n_nodes, a_coulping_energy);
+Bonds J(n_nodes, j_coulping_energy);
+State my_state(n_nodes, beta, energy);
 
 // Choices of algorithms, use info from couplings
-RECA <StaticCouplings2D> *my_reca = new RECA <StaticCouplings2D>( &my_state, &A );
-Metropolis <StaticCouplings2D> *my_metro = new Metropolis <StaticCouplings2D>( &my_state, &A );
+auto my_reca = std::unique_ptr<RECA<Bonds>>(new RECA<Bonds>( &my_state, &A ));
+auto my_metro = std::unique_ptr<Metropolis<Bonds>>(new Metropolis<Bonds>( &my_state, &A ));
 
 double a_coulping_energy(node i, node j)
 {
@@ -51,7 +52,7 @@ int main(int argc, char **argv)
 	while (true)
 	{
 		// Step the state forward
-   		my_metro->evolve_state();
+   	my_metro->evolve_state();
 
 	}
 
