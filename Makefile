@@ -2,7 +2,8 @@ CXX := g++
 CXXFLAGS := -std=c++11 -O2 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
 INCLUDES := -I/usr/local/include -I.
 LIBS := -L/usr/local/lib
-OBJS :=  couplings.o utils.o
+OBJS :=  obj/couplings.o obj/utils.o
+HPP := $(wildcard src/*.hpp)
 
 detected_OS := $(shell uname -s)
 ifeq ($(detected_OS),Darwin)  # Mac OS X
@@ -14,18 +15,18 @@ ifeq ($(detected_OS),Linux)
 	  GLIBS += $(LIBS) -lGL -lglfw -Wl,-rpath,/usr/local/lib
 endif
 
-graphics: $(OBJS) graphics.o
-	$(CXX) $(INCLUDES) $(OBJS) graphics.o -o graphics $(GLIBS)
-graphics.o: graphics.cpp state.hpp algorithm.hpp couplings.hpp utils.hpp
-	$(CXX) $(INCLUDES) $(CXXFLAGS) -c graphics.cpp  -o graphics.o
-
-reca: $(OBJS) reca.o
-	$(CXX) $(INCLUDES) $(OBJS) reca.o -o reca $(LIBS)
-reca.o: reca.cpp state.hpp algorithm.hpp couplings.hpp utils.hpp
-	$(CXX) $(INCLUDES) $(CXXFLAGS) -c reca.cpp  -o reca.o
+graphics: $(OBJS) obj/graphics.o
+	$(CXX) $(INCLUDES) -o $@ $^ $(GLIBS)
+reca: $(OBJS) obj/reca.o
+	$(CXX) $(INCLUDES) -o $@ $^ $(LIBS)
+obj/%.o: src/%.cpp $(HPP)
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
 
 experiment:
-	$(CXX) $(INCLUDES) $(CXXFLAGS) experiment.cpp -o experiment
+	$(CXX) $(INCLUDES) $(CXXFLAGS) src/experiment.cpp -o experiment
 
 clean:
-	-rm *.o
+	-rm -f obj/*.o
+	-rm -f graphics
+	-rm -f reca
+	-rm -f experiment
