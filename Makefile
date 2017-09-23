@@ -5,10 +5,11 @@ else
 endif
 
 CXX := g++
-CXXFLAGS := -std=c++14 -O2 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
-INCLUDES := -I/usr/local/include
+CXXFLAGS := -std=c++11 -O2 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
+INCLUDES := -I/usr/local/include -I.
 LIBS := -L/usr/local/lib
 OBJS :=  main.o couplings.o utils.o
+NOBJS :=  nographics.o couplings.o utils.o
 INSTALLDIR := ../
 TARGET := main
 
@@ -32,6 +33,9 @@ install:
 	install $(TARGET) $(INSTALLDIR)
 clean:
 	-rm *.o
-
+nograpics: $(NOBJS)
+	$(CXX) $(INCLUDES) $(NOBJS) -o nographics
+nographics.o: nographics.cpp state.hpp algorithm.hpp couplings.hpp utils.hpp
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -c nographics.cpp  -o nographics.o
 experiment:
 	$(CXX) $(INCLUDES) $(CXXFLAGS) experiment.cpp -o experiment
