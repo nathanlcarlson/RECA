@@ -75,9 +75,9 @@ public:
 		double E = 0;
 		for(int i = 0; i < m_N; i++)
 		{
-			for (auto it = m_couplings->begin(i); it != m_couplings->end(i); ++it)
+			for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor)
 			{
-				E += m_state->energy(i, it->first);
+				E += m_state->energy(i, *neighbor);
 			}
 		}
 		return E;
@@ -115,9 +115,9 @@ private:
 
 	void propigate(int i)
 	{
-		for (auto it = m_couplings->begin(i); it != m_couplings->end(i); ++it)
+		for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor)
 		{
-			int j = it->first;
+			int j = *neighbor;
 			if (!(m_cluster->contains(j)))
 			{
 				m_cluster->add(j);
@@ -156,9 +156,9 @@ public:
 		double E_f = 0;
 
 		// Calculate initial energy
-		for (auto it = m_couplings->begin(i); it != m_couplings->end(i); ++it)
+		for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor)
 		{
-			int j = it->first;
+			int j = *neighbor;
 			E_i += m_state->energy(i, j);
 		}
 
@@ -166,9 +166,9 @@ public:
 		(*m_state)[i] = R;
 
 		// Calculate new energy
-		for (auto it = m_couplings->begin(i); it != m_couplings->end(i); ++it)
+		for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor)
 		{
-			int j = it->first;
+			int j = *neighbor;
 			E_f += m_state->energy(i, j);
 		}
 
@@ -187,9 +187,9 @@ public:
 		double E = 0;
 		for(int i = 0; i < m_N; i++)
 		{
-			for (auto it = m_couplings->begin(i); it != m_couplings->end(i); ++it)
+			for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor)
 			{
-				E += m_state->energy(i, it->first);
+				E += m_state->energy(i, *neighbor);
 			}
 		}
 		return E;
