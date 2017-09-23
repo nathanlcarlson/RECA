@@ -28,7 +28,6 @@ State my_state(n_nodes, beta, energy, N_states);
 
 // Choices of algorithms, use info from couplings
 RECA <StaticCouplings2D> *my_reca = new RECA <StaticCouplings2D>( &my_state, &A );
-//Wolff <StaticCouplings2D> *my_wolff = new Wolff <StaticCouplings2D>(&A, &my_state);
 Metropolis <StaticCouplings2D> *my_metro = new Metropolis <StaticCouplings2D>( &my_state, &A );
 
 double a_coulping_energy(node i, node j)
@@ -113,32 +112,18 @@ int main(int argc, char **argv)
 	glfwSetKeyCallback(window, specialKeys);
 
 	// Loop until the user closes the window
-	// Only render every n_steps
-
-	int interval = 1000;
+	// Only render according to interval
+	int interval = 1 << 10;
 	int count = interval;
-	int total_samples =  pow(10, 3);
-	int step = 0;
-	my_state.save_current();
 
 	while (!glfwWindowShouldClose(window))
 	{
 		// Step the state forward
     my_metro->evolve_state();
-		step++;
 		count--;
 		if (count == 0)
 		{
-			std::cout << step << ' ' << my_state.diff_saved() << ' ' << my_metro->total_energy() << '\n';
-			// total_samples--;
-			// if(total_samples == 0)
-			// {
-			// 	glfwTerminate();
-			//
-			// 	return 0;
-			// }
 			display_state();
-			// Swap front and back buffers
 			glfwSwapBuffers(window);
 			count = interval;
 		}
