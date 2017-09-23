@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <time.h>
 #include "utils.hpp"
 
 
@@ -17,17 +18,16 @@ public:
 	{
 		N = t_N;
 		m_v.resize(t_L);
-		seedRand(100);
+		seedRand( time(NULL) );
 		if(t_N == 1.0)
 		{
 			std::generate( m_v.begin(), m_v.end(), rand0_1 );
 		}
 		else
 		{
-
 			for(int i = 0; i < t_L; i++){
 				double r = randN(t_N)/t_N;
-				std::cout << r << std::endl;
+				//std::cout << r << std::endl;
 				m_v[i] = r;
 			}
 		}
@@ -52,7 +52,23 @@ public:
 	{
 		return m_v[i];
 	}
-
+	void save_current()
+	{
+		m_saved = m_v;
+	}
+	double diff_saved()
+	{
+		int n = m_v.size();
+		double d;
+		double s = 0;
+		for(int i = 0; i < n; i++)
+		{
+			d = fabs(m_v[i] - m_saved[i]);
+			if(d > 0.5) d = 1 - d;
+			s += d;
+		}
+		return s;
+	}
 	int size()
 	{
 		return m_v.size();
@@ -61,5 +77,6 @@ public:
 private:
 	EnergyFunction_Ptr m_energy;
 	std::vector <double> m_v;
+	std::vector <double> m_saved;
 };
 #endif
