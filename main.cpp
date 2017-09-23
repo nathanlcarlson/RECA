@@ -12,7 +12,7 @@ double j_coulping_energy(node i, node j);
 double energy(int i, int j);
 
 // The width of our 2D square and total number of nodes
-int n = 1 << 8;
+int n = 1 << 7;
 int n_nodes = n * n;
 double N_states = 200.0;
 // Display parameters
@@ -113,22 +113,34 @@ int main(int argc, char **argv)
 	glfwSetKeyCallback(window, specialKeys);
 
 	// Loop until the user closes the window
-	// Only render every 2^10 steps
-	int count = 0;
-	int n_steps = 1 << 10;
+	// Only render every n_steps
+
+	int interval = 1000;
+	int count = interval;
+	int total_samples =  pow(10, 3);
+	int step = 0;
+	my_state.save_current();
+
 	while (!glfwWindowShouldClose(window))
 	{
 		// Step the state forward
     my_metro->evolve_state();
-
-		count++;
-		if (count == n_steps)
+		step++;
+		count--;
+		if (count == 0)
 		{
+			std::cout << step << ' ' << my_state.diff_saved() << ' ' << my_metro->total_energy() << '\n';
+			// total_samples--;
+			// if(total_samples == 0)
+			// {
+			// 	glfwTerminate();
+			//
+			// 	return 0;
+			// }
 			display_state();
-      //std::cout << my_metro->total_energy() << std::endl;
 			// Swap front and back buffers
 			glfwSwapBuffers(window);
-			count = 0;
+			count = interval;
 		}
 		// Poll for and process events
 		glfwPollEvents();
