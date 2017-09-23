@@ -1,41 +1,31 @@
-ifeq ($(OS),Windows_NT)
-    detected_OS := Windows
-else
-    detected_OS := $(shell uname -s)
-endif
-
 CXX := g++
 CXXFLAGS := -std=c++11 -O2 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
 INCLUDES := -I/usr/local/include -I.
 LIBS := -L/usr/local/lib
-OBJS :=  main.o couplings.o utils.o
-NOBJS :=  nographics.o couplings.o utils.o
-INSTALLDIR := ../
-TARGET := main
+OBJS :=  couplings.o utils.o
 
-ifeq ($(detected_OS),Windows)
-    CXXFLAGS += -D WIN32
-endif
+detected_OS := $(shell uname -s)
 ifeq ($(detected_OS),Darwin)  # Mac OS X
     CXXFLAGS += -D OSX
-	  LIBS += -lglfw3 -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
+		GLIBS := $(LIBS) -lglfw3 -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
 endif
 ifeq ($(detected_OS),Linux)
     CXXFLAGS += -D LINUX
-	  LIBS += -Wl,-rpath,/usr/local/lib -lGL -lglfw
+	  GLIBS += $(LIBS) -lGL -lglfw -Wl,-rpath,/usr/local/lib
 endif
 
-$(TARGET): $(OBJS)
-	$(CXX) $(INCLUDES) $(OBJS) -o main $(LIBS)
-main.o: main.cpp state.hpp algorithm.hpp couplings.hpp utils.hpp
-	$(CXX) $(INCLUDES) $(CXXFLAGS) -c main.cpp  -o main.o
-install:
-	install $(TARGET) $(INSTALLDIR)
-clean:
-	-rm *.o
-nograpics: $(NOBJS)
-	$(CXX) $(INCLUDES) $(NOBJS) -o nographics
-nographics.o: nographics.cpp state.hpp algorithm.hpp couplings.hpp utils.hpp
-	$(CXX) $(INCLUDES) $(CXXFLAGS) -c nographics.cpp  -o nographics.o
+graphics: $(OBJS) graphics.o
+	$(CXX) $(INCLUDES) $(OBJS) graphics.o -o graphics $(GLIBS)
+graphics.o: graphics.cpp state.hpp algorithm.hpp couplings.hpp utils.hpp
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -c graphics.cpp  -o graphics.o
+
+reca: $(OBJS) reca.o
+	$(CXX) $(INCLUDES) $(OBJS) reca.o -o reca $(LIBS)
+reca.o: reca.cpp state.hpp algorithm.hpp couplings.hpp utils.hpp
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -c reca.cpp  -o reca.o
+
 experiment:
 	$(CXX) $(INCLUDES) $(CXXFLAGS) experiment.cpp -o experiment
+
+clean:
+	-rm *.o
