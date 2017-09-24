@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
 	while (!glfwWindowShouldClose(window)) {
 
 		// Step the state forward
-		my_metro->evolve_state();
+		my_reca->evolve_state();
 		count--;
 		if (count == 0) {
 
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
 		}
 		// Poll for and process events
 		glfwPollEvents();
-		
+
 	}
 
 	glfwTerminate();

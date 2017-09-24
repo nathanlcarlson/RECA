@@ -47,18 +47,17 @@ class RECA {
 
 	private:
 
-		int m_N;
+		int m_L;
 
 		State *m_state;
+		State *m_replica;
 		Couplings *m_couplings;
 		Cluster *m_cluster;
 
-		std::vector <double> m_replica;
-
 		void swap(int j) {
 
-			double tmp = m_replica[j];
-			m_replica[j] = (*m_state)[j];
+			double tmp = (*m_replica)[j];
+			(*m_replica)[j] = (*m_state)[j];
 			(*m_state)[j] = tmp;
 
 		}
@@ -100,23 +99,16 @@ class RECA {
 		{
 
 			m_state = t_state;
-			m_N = m_state->size();
-
-			m_replica.resize(m_N);
-			for (int i = 0; i < m_N; i++) {
-
-				m_replica[i] = rand0_1();
-
-			}
-
-			m_cluster = new Cluster(m_N);
+			m_L = m_state->size();
+			m_replica = new State( *m_state );
+			m_cluster = new Cluster( m_L );
 
 		}
 		void evolve_state() {
 
 			m_state->shift_all();
 
-			int i = randN(m_N);
+			int i = randN(m_L);
 			swap(i);
 	    m_cluster->add(i);
 			propigate(i);
@@ -129,7 +121,7 @@ class RECA {
 
 			double E = 0;
 
-			for(int i = 0; i < m_N; i++) {
+			for(int i = 0; i < m_L; i++) {
 
 				for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor) {
 

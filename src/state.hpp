@@ -38,6 +38,7 @@ class State {
 			return m_energy(i, j);
 
 		}
+
 		void shift_all() {
 
 			double r;
@@ -77,6 +78,7 @@ class State {
 				}
 			}
 		}
+
 		int randomize_one(int i = -1) {
 
 			if(i == -1) {
@@ -92,6 +94,7 @@ class State {
 
 			return i;
 		}
+
 		void print() {
 
 			std::cout << "State contains:";
@@ -107,11 +110,13 @@ class State {
 			return m_v[i];
 
 		}
+
 		void save_current() {
 
 			m_saved = m_v;
 
 		}
+
 		double diff_saved() {
 
 			int n = m_v.size();
@@ -126,8 +131,9 @@ class State {
 
 			}
 			return s;
-			
+
 		}
+		
 		int size() {
 
 			return m_v.size();
