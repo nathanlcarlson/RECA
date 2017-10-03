@@ -17,7 +17,7 @@ class State {
 
 		EnergyFunction_Ptr m_energy;
 		std::vector <double> m_v;
-		std::vector <double> m_saved;
+		std::vector <std::vector <double>> m_history;
 
 	public:
 
@@ -95,6 +95,16 @@ class State {
 			return i;
 		}
 
+		void save() {
+
+			m_history.push_back(m_v);
+
+		}
+
+		double get_history(int t, int i) {
+			return m_history[t][i];
+		}
+
 		void print() {
 
 			std::cout << "State contains:";
@@ -108,29 +118,6 @@ class State {
 		double&operator[](int i) {
 
 			return m_v[i];
-
-		}
-
-		void save_current() {
-
-			m_saved = m_v;
-
-		}
-
-		double diff_saved() {
-
-			int n = m_v.size();
-			double d;
-			double s = 0;
-
-			for(int i = 0; i < n; i++) {
-
-				d = fabs(m_v[i] - m_saved[i]);
-				if(d > 0.5) d = 1 - d;
-				s += d;
-
-			}
-			return s;
 
 		}
 
