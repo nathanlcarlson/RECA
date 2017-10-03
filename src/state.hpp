@@ -133,7 +133,7 @@ class State {
 			return s;
 
 		}
-		
+
 		int size() {
 
 			return m_v.size();

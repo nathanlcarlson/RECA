@@ -8,7 +8,7 @@
 #include "algorithm.hpp"
 
 // The width of our 2D square and total number of nodes
-int n = 1 << 7;
+int n = 1 << 6;
 int n_nodes = n * n;
 // Display parameters
 double size = 0.8;
@@ -126,18 +126,21 @@ int main(int argc, char **argv) {
 	// Only render according to interval
 	int interval = 1 << 10;
 	int count = interval;
-
+	int n_steps = 0;
 	while (!glfwWindowShouldClose(window)) {
 
 		// Step the state forward
-		my_reca->evolve_state();
+		my_metro->evolve_state();
 		count--;
+		n_steps++;
 		if (count == 0) {
 
 			display_state();
 			glfwSwapBuffers(window);
 			count = interval;
-
+			std::cout << n_steps << '\n';
+			std::cout << "Press enter to continue\n";
+      getchar();
 		}
 		// Poll for and process events
 		glfwPollEvents();

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <memory>
 #include <math.h>
 #include "utils.hpp"
@@ -7,7 +8,7 @@
 #include "algorithm.hpp"
 
 // The width of our 2D square and total number of nodes
-int n = 1 << 7;
+int n = 1 << 6;
 int n_nodes = n * n;
 // Physical parameter of system
 double beta = 30.0;
@@ -50,18 +51,21 @@ int main(int argc, char **argv) {
 	auto my_reca = std::unique_ptr<RECA<Bonds>>(new RECA<Bonds>( my_state, A ));
 	auto my_metro = std::unique_ptr<Metropolis<Bonds>>(new Metropolis<Bonds>( my_state, A ));
 
-	int interval = 1000;
+	int interval = 20000;
 	int count = interval;
-
+	std::ofstream outfile;
+	outfile.open("states");
 	while (true) {
-
+		write_state(std::ref(outfile));
 		// Step the state forward
-   	my_reca->evolve_state();
+   	my_metro->evolve_state();
 		count--;
 		if(count == 0) {
 
 			count = interval;
-			std::cout << my_reca->total_energy() << '\n';
+			//std::cout << my_reca->total_energy() << '\n';
+			outfile.close();
+			return 0;
 
 		}
 	}
