@@ -28,7 +28,7 @@ class State {
 		{
 
 			m_v.resize(t_L);
-			seedRand( time(NULL) );
+			//seedRand( time(NULL) );
 			randomize_all();
 
 		}
