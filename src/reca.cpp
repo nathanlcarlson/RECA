@@ -23,7 +23,7 @@ State *my_state = NULL;
 State *control_state = NULL;
 double a_coupling_energy(node i, node j) {
 
-	return (i.x * j.y - i.y * j.x) / (double)n;
+	return (i.x * j.y - i.y * j.x);
 
 }
 
@@ -35,13 +35,13 @@ double j_coupling_energy(node i, node j) {
 
 double energy(int i, int j) {
 
-	return (*J)(i, j) * cos( 2 * M_PI * ( (*my_state)[i] - (*my_state)[j] - (*A)(i, j) ) );
+	return -1*(*J)(i, j) * cos( 2 * M_PI * ( (*my_state)[i] - (*my_state)[j] - (*A)(i, j) ) );
 
 }
 
 double control_energy(int i, int j) {
 
-	return (*J)(i, j) * cos( 2 * M_PI * ( (*control_state)[i] - (*control_state)[j] - (*A)(i, j) ) );
+	return -1*(*J)(i, j) * cos( 2 * M_PI * ( (*control_state)[i] - (*control_state)[j] - (*A)(i, j) ) );
 
 }
 
@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
 
 
 	int t = 0;
-	int t_start = 1000;
+	int t_start = 50000;
 
   double err;
 	double control;
@@ -116,6 +116,7 @@ int main(int argc, char **argv) {
 
 	// Reset time
 	t = 0;
+	std::cout << "Begin gathering metrics\n"; 
 
 	// Gather metrics
 	while (true) {
@@ -143,7 +144,7 @@ int main(int argc, char **argv) {
 
  				min_dt = dt + 1;
 
- 				if(min_dt == max_dt + 1) {
+ 				if( min_dt == max_dt ) {
 
  					for (auto it=sum_dts.begin(); it!=sum_dts.end(); ++it)
 						corfile << *it/(n_dt*n_nodes) << '\n';
@@ -169,7 +170,7 @@ int main(int argc, char **argv) {
 
 		// Get energies
 		control = control_metro->total_energy();
-		expr = my_metro->total_energy();
+		expr = my_reca->total_energy();
 
 		enrfile << control << ' ' << expr <<'\n';
 

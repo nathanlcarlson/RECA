@@ -127,12 +127,12 @@ class RECA {
 
 					if( i < *neighbor) {
 
-						E += m_state->energy(i, *neighbor);
+						E += m_state->energy(i, *neighbor) + m_replica->energy(i, *neighbor);
 					}
 				}
 			}
 
-			return -1*E;
+			return E;
 
 		}
 };
@@ -207,7 +207,7 @@ class Metropolis {
 				}
 			}
 
-			return -1*E;
+			return E;
 
 		}
 };
