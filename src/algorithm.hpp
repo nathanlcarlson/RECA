@@ -125,12 +125,14 @@ class RECA {
 
 				for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor) {
 
-					E += m_state->energy(i, *neighbor);
+					if( i < *neighbor) {
 
+						E += m_state->energy(i, *neighbor);
+					}
 				}
 			}
 
-			return E;
+			return -1*E;
 
 		}
 };
@@ -198,12 +200,14 @@ class Metropolis {
 
 				for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor) {
 
-					E += m_state->energy(i, *neighbor);
+					if( i < *neighbor) {
 
+						E += m_state->energy(i, *neighbor);
+					}
 				}
 			}
 
-			return E;
+			return -1*E;
 
 		}
 };
