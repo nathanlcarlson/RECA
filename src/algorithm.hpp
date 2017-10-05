@@ -35,9 +35,9 @@ class Cluster {
 
 			m_current -= 1;
 
-			if(m_current == 0) {
+			if(m_current == 1) {
 				m_current = std::numeric_limits<unsigned int>::max() - 1;
-				std::fill(m_cluster.begin(), m_cluster.end(), -1);
+				std::fill(m_cluster.begin(), m_cluster.end(), 0);
 			}
 		}
 };
