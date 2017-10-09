@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <map>
 #include <time.h>
 #include "utils.hpp"
 
@@ -17,6 +18,7 @@ class State {
 
 		EnergyFunction_Ptr m_energy;
 		std::vector <StaticCouplings2D*> m_bonds;
+		std::map <char, StaticCouplings2D*> m_bonds_map;
 		std::vector <double> m_v;
 		std::vector <std::vector <double>> m_history;
 
@@ -29,6 +31,9 @@ class State {
 			: B(t_B), m_energy(t_f), m_N(t_N), m_bonds({t_bonds...})
 		{
 
+			for( auto it = m_bonds.begin(); it != m_bonds.end(); it++) {
+				m_bonds_map[(*it)->id] = *it;
+			}
 			m_v.resize(t_L);
 			//seedRand( time(NULL) );
 			randomize_all();
@@ -124,9 +129,7 @@ class State {
 		}
 		StaticCouplings2D* bonds(char id) {
 
-			for( auto it = m_bonds.begin(); it != m_bonds.end(); it++) {
-				if ((*it)->id == id) return (*it);
-			}
+			return m_bonds_map[id];
 
 		}
 		int size() {
