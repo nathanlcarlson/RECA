@@ -8,7 +8,6 @@
 #include "state.hpp"
 #include "algorithm.hpp"
 
-// The width of our 2D square and total number of nodes
 #define A 'A'
 #define J 'J'
 

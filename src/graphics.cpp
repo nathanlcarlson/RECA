@@ -7,24 +7,15 @@
 #include "state.hpp"
 #include "algorithm.hpp"
 
-// The width of our 2D square and total number of nodes
-int n = 1 << 6;
-int n_nodes = n * n;
-// Display parameters
-double size = 0.8;
-double w = size / n;
-// Physical parameter of system
-double beta = 30.0;
+#define A 'A'
+#define J 'J'
 
 typedef StaticCouplings2D Bonds;
-// Couplings used to calculate energy
-Bonds *A = NULL;
-Bonds *J = NULL;
-State *my_state = NULL;
+
 
 double a_coupling_energy(node i, node j) {
 
-	return (i.x * j.y - i.y * j.x) / (double)n;
+	return (i.x * j.y - i.y * j.x);
 
 }
 
@@ -34,13 +25,13 @@ double j_coupling_energy(node i, node j) {
 
 }
 
-double energy(int i, int j) {
+double energy(State* t, int i, int j) {
 
-	return (*J)(i, j) * cos( 2 * M_PI * ( (*my_state)[i] - (*my_state)[j] - (*A)(i, j) ) );
+	return t->bonds(J)->get(i, j) * cos( 2 * M_PI * ( (*t)[i] - (*t)[j] - t->bonds(A)->get(i, j) ) );
 
 }
 
-void display_state(void) {
+void display_state(State* state, int n, int w) {
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	int c = 0;
@@ -50,9 +41,10 @@ void display_state(void) {
 
 			glBegin(GL_TRIANGLES);
 			// Get color
-			glColor3f(hueToRGB((*my_state)[c] + 0.3333),
-			          hueToRGB((*my_state)[c]),
-			          hueToRGB((*my_state)[c] - 0.3333));
+			//std::cout << (*state)[c] << '\n';
+			glColor3f(hueToRGB((*state)[c] + 0.3333),
+			          hueToRGB((*state)[c]),
+			          hueToRGB((*state)[c] - 0.3333));
 			c++;
 			// Make Square
 			glVertex3f((1 + 2 * i) * w - w, (1 + 2 * j) * w - w, 0.0);
@@ -74,31 +66,32 @@ void specialKeys(GLFWwindow *window, int key, int scancode, int action, int mods
 		exit(0);
 
 	}
-	else if (key == GLFW_KEY_RIGHT) {
-
-		my_state->B += 0.1;
-
-	}
-	else if (key == GLFW_KEY_LEFT) {
-
-		my_state->B -= 0.1;
-
-	}
 }
 
 int main(int argc, char **argv) {
 
-	A = new Bonds(n_nodes, a_coupling_energy);
-	J = new Bonds(n_nodes, j_coupling_energy);
-	my_state = new State(n_nodes, beta, energy);
+	seedRand( time(NULL) );
+
+	int n = 1 << 5;
+	int n_nodes = n * n;
+	int n_states = 1;
+	// Display parameters
+	double size = 0.8;
+	double w = size / n;
+	// Physical parameter of system
+	double beta = 30.0;
+
+	Bonds* bonds_A = new Bonds(A, n_nodes, a_coupling_energy);
+	Bonds* bonds_J = new Bonds(J, n_nodes, j_coupling_energy);
+	State* my_state = new State(n_nodes, n_states, beta, energy, bonds_A, bonds_J);
 
 	// Set up couplings
-	A->square2D(false);
-	J->square2D(false);
+	bonds_A->square2D(false);
+	bonds_J->square2D(false);
 
 	// Choices of algorithms
-	auto my_reca = std::unique_ptr<RECA<Bonds>>(new RECA<Bonds>( my_state, A ));
-	auto my_metro = std::unique_ptr<Metropolis<Bonds>>(new Metropolis<Bonds>( my_state, A ));
+	RECA* my_reca = new RECA( my_state );
+	Metropolis* my_metro = new Metropolis( my_state );
 
 	GLFWwindow *window;
 
@@ -130,18 +123,20 @@ int main(int argc, char **argv) {
 	while (!glfwWindowShouldClose(window)) {
 
 		// Step the state forward
-		my_metro->evolve_state();
-		count--;
-		n_steps++;
-		if (count == 0) {
-
-			display_state();
-			glfwSwapBuffers(window);
-			count = interval;
-			std::cout << n_steps << '\n';
-			std::cout << "Press enter to continue\n";
-      getchar();
-		}
+		//my_metro->evolve_state();
+		// count--;
+		// n_steps++;
+		// if (count == 0) {
+		//
+		// 	display_state(my_state, n, w);
+		// 	glfwSwapBuffers(window);
+		// 	// count = interval;
+		// 	// std::cout << n_steps << '\n';
+		// 	// std::cout << "Press enter to continue\n";
+    //   // getchar();
+		// }
+		display_state(my_state, n, w);
+		glfwSwapBuffers(window);
 		// Poll for and process events
 		glfwPollEvents();
 
