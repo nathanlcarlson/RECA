@@ -9,18 +9,11 @@
 #include "algorithm.hpp"
 
 // The width of our 2D square and total number of nodes
-
-int n = 1 << 5;
-int n_nodes = n * n;
-// Physical parameter of system
-double beta = 30.0;
+#define A 'A'
+#define J 'J'
 
 typedef StaticCouplings2D Bonds;
-// Couplings used to calculate energy
-Bonds *A = NULL;
-Bonds *J = NULL;
-State *my_state = NULL;
-State *control_state = NULL;
+
 double a_coupling_energy(node i, node j) {
 
 	return (i.x * j.y - i.y * j.x);
@@ -33,15 +26,9 @@ double j_coupling_energy(node i, node j) {
 
 }
 
-double energy(int i, int j) {
+double energy(State* t, int i, int j) {
 
-	return -1*(*J)(i, j) * cos( 2 * M_PI * ( (*my_state)[i] - (*my_state)[j] - (*A)(i, j) ) );
-
-}
-
-double control_energy(int i, int j) {
-
-	return -1*(*J)(i, j) * cos( 2 * M_PI * ( (*control_state)[i] - (*control_state)[j] - (*A)(i, j) ) );
+	return t->bonds(J)->get(i, j) * cos( 2 * M_PI * ( (*t)[i] - (*t)[j] - t->bonds(A)->get(i, j) ) );
 
 }
 
@@ -49,19 +36,25 @@ int main(int argc, char **argv) {
 
 	seedRand( time(NULL) );
 
-	A = new Bonds(n_nodes, a_coupling_energy);
-	J = new Bonds(n_nodes, j_coupling_energy);
-	my_state = new State(n_nodes, beta, energy);
-	control_state = new State(n_nodes, beta, control_energy);
+	int n = 1 << 5;
+	int n_nodes = n * n;
+	int n_states = 1;
+	// Physical parameter of system
+	double beta = 30.0;
+
+	Bonds* bonds_A = new Bonds(A, n_nodes, a_coupling_energy);
+	Bonds* bonds_J = new Bonds(J, n_nodes, j_coupling_energy);
+	State* my_state = new State(n_nodes, n_states, beta, energy, bonds_A, bonds_J);
+	State* control_state = new State(n_nodes, n_states, beta, energy, bonds_A, bonds_J);
 
 	// Set up couplings
-	A->square2D(false);
-	J->square2D(false);
+	bonds_A->square2D(false);
+	bonds_J->square2D(false);
 
 	// Choices of algorithms
-	auto my_reca = std::unique_ptr<RECA<Bonds>>(new RECA<Bonds>( my_state, A ));
-	auto my_metro = std::unique_ptr<Metropolis<Bonds>>(new Metropolis<Bonds>( my_state, A ));
-	auto control_metro = std::unique_ptr<Metropolis<Bonds>>(new Metropolis<Bonds>( control_state, A ));
+	RECA<Bonds>* my_reca = new RECA<Bonds>( my_state, bonds_A );
+	Metropolis<Bonds>* my_metro = new Metropolis<Bonds>( my_state, bonds_A );
+	Metropolis<Bonds>* control_metro = new Metropolis<Bonds>( control_state, bonds_A );
 
 
 	double freq = atof(argv[4])/100.0;
@@ -116,7 +109,7 @@ int main(int argc, char **argv) {
 
 	// Reset time
 	t = 0;
-	std::cout << "Begin gathering metrics\n"; 
+	std::cout << "Begin gathering metrics\n";
 
 	// Gather metrics
 	while (true) {

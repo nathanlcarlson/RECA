@@ -1,8 +1,8 @@
 #include "couplings.hpp"
 
 
-StaticCouplings2D::StaticCouplings2D(int t_n, CouplingEnergyFunction_Ptr t_f)
-  : m_energy(t_f), m_size(t_n)
+StaticCouplings2D::StaticCouplings2D(char t_id, int t_n, CouplingEnergyFunction_Ptr t_f)
+  : m_energy(t_f), m_size(t_n), id(t_id)
 {
 	m_map.resize(t_n);
   m_neighbors.resize(t_n);
@@ -91,6 +91,12 @@ void StaticCouplings2D::square2D(bool periodic) {
 
 }
 
+double StaticCouplings2D::get(int t_i, int t_j) {
+
+  return m_map[t_i][t_j];
+
+}
+
 void StaticCouplings2D::print() {
 
 	int c = 0;
@@ -129,5 +135,5 @@ Neighborhood::iterator StaticCouplings2D::begin(int i) {
 Neighborhood::iterator StaticCouplings2D::end(int i) {
 
 	return m_neighbors[i].end();
-  
+
 }

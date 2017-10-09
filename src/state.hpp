@@ -9,13 +9,14 @@
 
 class State {
 
-	typedef std::function <double (int, int)> EnergyFunction_Ptr;
+	typedef std::function <double (State*, int, int)> EnergyFunction_Ptr;
 
 	private:
 
 		double m_N;
 
 		EnergyFunction_Ptr m_energy;
+		std::vector <StaticCouplings2D*> m_bonds;
 		std::vector <double> m_v;
 		std::vector <std::vector <double>> m_history;
 
@@ -23,8 +24,9 @@ class State {
 
 		double B;
 
-		State(int t_L, int t_B, EnergyFunction_Ptr t_f, int t_N = 1)
-			: B(t_B), m_energy(t_f), m_N(t_N)
+		template< typename... Args>
+		State(int t_L, int t_N, int t_B, EnergyFunction_Ptr t_f, Args ...t_bonds)
+			: B(t_B), m_energy(t_f), m_N(t_N), m_bonds({t_bonds...})
 		{
 
 			m_v.resize(t_L);
@@ -35,7 +37,7 @@ class State {
 
 		double energy(int i, int j) {
 
-			return m_energy(i, j);
+			return m_energy(this, i, j);
 
 		}
 
@@ -120,7 +122,13 @@ class State {
 			return m_v[i];
 
 		}
+		StaticCouplings2D* bonds(char id) {
 
+			for( auto it = m_bonds.begin(); it != m_bonds.end(); it++) {
+				if ((*it)->id == id) return (*it);
+			}
+
+		}
 		int size() {
 
 			return m_v.size();

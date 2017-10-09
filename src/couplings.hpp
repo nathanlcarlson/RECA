@@ -26,9 +26,12 @@ class StaticCouplings2D {
 
 	public:
 
-		StaticCouplings2D(int t_n, CouplingEnergyFunction_Ptr t_f);
+		char id;
+
+		StaticCouplings2D(char t_id, int t_n, CouplingEnergyFunction_Ptr t_f);
 
 		double&operator()(int t_i, int t_j);
+		double get(int t_i, int t_j);
 		void square2D(bool periodic = true);
 		void print();
 
