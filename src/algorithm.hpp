@@ -42,7 +42,6 @@ class Cluster {
 		}
 };
 
-template <class Couplings>
 class RECA {
 
 	private:
@@ -51,7 +50,6 @@ class RECA {
 
 		State *m_state;
 		State *m_replica;
-		Couplings *m_couplings;
 		Cluster *m_cluster;
 
 		void swap(int j) {
@@ -80,7 +78,7 @@ class RECA {
 
 		void propigate(int i) {
 
-			for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor) {
+			for (auto neighbor = m_state->bonds()->begin(i); neighbor != m_state->bonds()->end(i); ++neighbor) {
 
 				int j = *neighbor;
 
@@ -94,8 +92,7 @@ class RECA {
 		}
 
 	public:
-		RECA(State *t_state, Couplings *t_couplings)
-			: m_couplings( t_couplings )
+		RECA(State *t_state)
 		{
 
 			m_state = t_state;
@@ -123,7 +120,7 @@ class RECA {
 
 			for(int i = 0; i < m_L; i++) {
 
-				for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor) {
+				for (auto neighbor = m_state->bonds()->begin(i); neighbor != m_state->bonds()->end(i); ++neighbor) {
 
 					if( i < *neighbor) {
 
@@ -137,19 +134,16 @@ class RECA {
 		}
 };
 
-template <class Couplings>
 class Metropolis {
 
 	private:
 
 		int m_L;
 		State *m_state;
-		Couplings *m_couplings;
 
 	public:
 
-		Metropolis(State *t_state, Couplings *t_couplings)
-			: m_couplings( t_couplings )
+		Metropolis(State *t_state)
 		{
 			m_state = t_state;
 			m_L = m_state->size();
@@ -164,7 +158,7 @@ class Metropolis {
 			double E_f = 0;
 
 			// Calculate initial energy
-			for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor) {
+			for (auto neighbor = m_state->bonds()->begin(i); neighbor != m_state->bonds()->end(i); ++neighbor) {
 
 				int j = *neighbor;
 				E_i += m_state->energy(i, j);
@@ -175,7 +169,7 @@ class Metropolis {
 			m_state->randomize_one(i);
 
 			// Calculate new energy
-			for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor) {
+			for (auto neighbor = m_state->bonds()->begin(i); neighbor != m_state->bonds()->end(i); ++neighbor) {
 
 				int j = *neighbor;
 				E_f += m_state->energy(i, j);
@@ -193,22 +187,5 @@ class Metropolis {
 			}
 		}
 
-		double total_energy() {
-
-			double E = 0;
-			for(int i = 0; i < m_L; i++) {
-
-				for (auto neighbor = m_couplings->begin(i); neighbor != m_couplings->end(i); ++neighbor) {
-
-					if( i < *neighbor) {
-
-						E += m_state->energy(i, *neighbor);
-					}
-				}
-			}
-
-			return E;
-
-		}
 };
 #endif

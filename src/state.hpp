@@ -15,6 +15,7 @@ class State {
 	private:
 
 		double m_N;
+		double m_L;
 
 		EnergyFunction_Ptr m_energy;
 		std::vector <StaticCouplings2D*> m_bonds;
@@ -28,7 +29,7 @@ class State {
 
 		template< typename... Args>
 		State(int t_L, int t_N, int t_B, EnergyFunction_Ptr t_f, Args ...t_bonds)
-			: B(t_B), m_energy(t_f), m_N(t_N), m_bonds({t_bonds...})
+			: B(t_B), m_energy(t_f), m_N(t_N), m_L(t_L), m_bonds({t_bonds...})
 		{
 
 			for( auto it = m_bonds.begin(); it != m_bonds.end(); it++) {
@@ -130,6 +131,29 @@ class State {
 		StaticCouplings2D* bonds(char id) {
 
 			return m_bonds_map[id];
+
+		}
+		StaticCouplings2D* bonds() {
+
+			return m_bonds[0];
+
+		}
+		double total_energy() {
+
+			double E = 0;
+
+			for(int i = 0; i < m_L; i++) {
+
+				for (auto neighbor = m_bonds[0]->begin(i); neighbor != m_bonds[0]->end(i); ++neighbor) {
+
+					if( i < *neighbor) {
+
+						E += energy(i, *neighbor);
+					}
+				}
+			}
+
+			return E;
 
 		}
 		int size() {

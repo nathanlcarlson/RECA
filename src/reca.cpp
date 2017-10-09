@@ -52,9 +52,9 @@ int main(int argc, char **argv) {
 	bonds_J->square2D(false);
 
 	// Choices of algorithms
-	RECA<Bonds>* my_reca = new RECA<Bonds>( my_state, bonds_A );
-	Metropolis<Bonds>* my_metro = new Metropolis<Bonds>( my_state, bonds_A );
-	Metropolis<Bonds>* control_metro = new Metropolis<Bonds>( control_state, bonds_A );
+	RECA* my_reca = new RECA( my_state );
+	Metropolis* my_metro = new Metropolis( my_state );
+	Metropolis* control_metro = new Metropolis( control_state );
 
 
 	double freq = atof(argv[4])/100.0;
@@ -162,8 +162,8 @@ int main(int argc, char **argv) {
 		control_metro->evolve_state();
 
 		// Get energies
-		control = control_metro->total_energy();
-		expr = my_reca->total_energy();
+		control = control_state->total_energy();
+		expr = my_state->total_energy();
 
 		enrfile << control << ' ' << expr <<'\n';
 
