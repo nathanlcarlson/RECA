@@ -11,6 +11,7 @@ int N = 8;
 int L = 3;
 // Total number of states
 int N_states = pow(N, 2*L);
+int N_pri = pow(N, L);
 // Minimum number of bits required to represent N spins
 int bits = ceil(log(N)/log(2));
 
@@ -24,6 +25,8 @@ int main(int argc, char **argv){
   std::vector< int > u;
   // Set to store unique_states
   std::set< int > unique_states;
+  std::set< int > unique_rep;
+  std::set< int > unique_pri;
 
   s.resize(L);
   u.resize(L);
@@ -65,20 +68,26 @@ int main(int argc, char **argv){
 
     // Check states reached
     int state = 0;
+    int pri = 0;
+    int rep = 0;
     // Create bit string
     for (int j = 0; j < L; j++)
 		{
-      std::cout << (u[j] << j*bits) << ' ';
+      //std::cout << (u[j] << j*bits) << ' ';
 			state += u[j] << j*bits;
+      rep += u[j] << j*bits;
 		}
-    std::cout << std::endl;
+    //std::cout << std::endl;
     for (int j = L; j < 2*L; j++)
 		{
-      std::cout << (s[j-L] << j*bits) << ' ';
+      //std::cout << (s[j-L] << j*bits) << ' ';
 			state += s[j-L] << j*bits;
+      pri += s[j-L] << j*bits;
 		}
     // The set data type makes sure all elements are unique
     unique_states.insert( state );
+    unique_pri.insert( pri );
+    unique_rep.insert( rep );
 
     // Information about the system
     std::cout << std::endl;
@@ -87,6 +96,10 @@ int main(int argc, char **argv){
     // for (auto it=unique_states.begin(); it!=unique_states.end(); ++it)
     //   std::cout << ' ' << *it;
     // std::cout << '\n';
+    if(unique_rep.size() == N_pri && unique_pri.size() == N_pri){
+      std::cout << "All pri and rep states " << N_pri << std::endl;
+      //getchar();
+    }
     if(unique_states.size() == N_states){
       std::cout << "All states " << N_states << std::endl;
       return 0;
