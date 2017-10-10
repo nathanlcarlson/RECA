@@ -7,59 +7,46 @@
 #include "state.hpp"
 #include "algorithm.hpp"
 
-
-double a_coulping_energy(node i, node j);
-double j_coulping_energy(node i, node j);
-double energy(int i, int j);
-
-// The width of our 2D square and total number of nodes
-int n = 1 << 7;
-int n_nodes = n * n;
-// Display parameters
-double size = 0.8;
-double w = size / n;
-// Physical parameter of system
-double beta = 30.0;
+#define A 'A'
+#define J 'J'
 
 typedef StaticCouplings2D Bonds;
-// Couplings used to calculate energy
-Bonds A(n_nodes, a_coulping_energy);
-Bonds J(n_nodes, j_coulping_energy);
-State my_state(n_nodes, beta, energy);
 
-// Choices of algorithms, use info from couplings
-auto my_reca = std::unique_ptr<RECA<Bonds>>(new RECA<Bonds>( &my_state, &A ));
-auto my_metro = std::unique_ptr<Metropolis<Bonds>>(new Metropolis<Bonds>( &my_state, &A ));
 
-double a_coulping_energy(node i, node j)
-{
-	return (i.x * j.y - i.y * j.x) / (double)n;
+double a_coupling_energy(node i, node j) {
+
+	return (i.x * j.y - i.y * j.x);
+
 }
 
-double j_coulping_energy(node i, node j)
-{
+double j_coupling_energy(node i, node j) {
+
 	return 1.0;
+
 }
 
-double energy(int i, int j)
-{
-	return J(i, j) * cos(2 * M_PI * (my_state[i] - my_state[j] - A(i, j)));
+double energy(State* t, int i, int j) {
+
+	//return t->bonds(J)->get(i, j) * cos( 2 * M_PI * ( (*t)[i] - (*t)[j] - t->bonds(A)->get(i, j) ) );
+	return cos( 2 * M_PI * ( (*t)[i] - (*t)[j] - t->bonds(A)->get(i, j) ) );
+
 }
 
-void display_state(void)
-{
+void display_state(State* state, int n, double w) {
+
 	glClear(GL_COLOR_BUFFER_BIT);
 	int c = 0;
-	for (int i = -n / 2; i < n / 2; i++)
-	{
-		for (int j = -n / 2; j < n / 2; j++)
-		{
+	for (int i = -n / 2; i < n / 2; i++) {
+
+		for (int j = -n / 2; j < n / 2; j++) {
+
 			glBegin(GL_TRIANGLES);
-			glColor3f(hueToRGB(my_state[c] + 0.3333),
-			          hueToRGB(my_state[c]),
-			          hueToRGB(my_state[c] - 0.3333));
+			// Get color
+			glColor3f(hueToRGB((*state)[c] + 0.3333),
+			          hueToRGB((*state)[c]),
+			          hueToRGB((*state)[c] - 0.3333));
 			c++;
-			//Make Square
+			// Make Square
 			glVertex3f((1 + 2 * i) * w - w, (1 + 2 * j) * w - w, 0.0);
 			glVertex3f((1 + 2 * i) * w - w, (1 + 2 * j) * w + w, 0.0);
 			glVertex3f((1 + 2 * i) * w + w, (1 + 2 * j) * w - w, 0.0);
@@ -67,46 +54,63 @@ void display_state(void)
 			glVertex3f((1 + 2 * i) * w + w, (1 + 2 * j) * w - w, 0.0);
 			glVertex3f((1 + 2 * i) * w + w, (1 + 2 * j) * w + w, 0.0);
 			glEnd();
+
 		}
 	}
 }
 
-void specialKeys(GLFWwindow *window, int key, int scancode, int action, int mods)
-{
-	if (key == GLFW_KEY_ESCAPE)
-	{
+void specialKeys(GLFWwindow *window, int key, int scancode, int action, int mods) {
+
+	if (key == GLFW_KEY_ESCAPE) {
+
 		exit(0);
-	}
-	else if (key == GLFW_KEY_RIGHT)
-	{
-		my_state.B += 0.1;
-	}
-	else if (key == GLFW_KEY_LEFT)
-	{
-		my_state.B -= 0.1;
+
 	}
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
+
+	seedRand( time(NULL) );
+
+	int n = 1 << 8;
+	int n_nodes = n * n;
+	int n_states = 1;
+	// Display parameters
+	double size = 0.8;
+	double w = size / n;
+	// Physical parameter of system
+	double beta = 30.0;
+
+	Bonds* bonds_A = new Bonds(A, n_nodes, a_coupling_energy);
+	Bonds* bonds_J = new Bonds(J, n_nodes, j_coupling_energy);
 	// Set up couplings
-	A.square2D(false);
-	J.square2D(false);
+	bonds_A->square2D(false);
+	bonds_A->scale_all( 1.0/n );
+	bonds_J->square2D(false);
+
+	State* my_state = new State(n_nodes, n_states, beta, energy, bonds_A, bonds_J);
+
+	// Choices of algorithms
+	RECA* my_reca = new RECA( my_state );
+	Metropolis* my_metro = new Metropolis( my_state );
 
 	GLFWwindow *window;
 
 	// Initialize the library
-	if (!glfwInit())
-	{
+	if (!glfwInit()) {
+
 		return -1;
+
 	}
 
 	// Create a windowed mode window and its OpenGL context
 	window = glfwCreateWindow(640, 640, "State", NULL, NULL);
-	if (!window)
-	{
+
+	if (!window) {
+
 		glfwTerminate();
 		return -1;
+
 	}
 	// Make the window's context current
 	glfwMakeContextCurrent(window);
@@ -116,21 +120,25 @@ int main(int argc, char **argv)
 	// Only render according to interval
 	int interval = 1 << 10;
 	int count = interval;
+	int n_steps = 0;
+	while (!glfwWindowShouldClose(window)) {
 
-	while (!glfwWindowShouldClose(window))
-	{
 		// Step the state forward
 		my_metro->evolve_state();
 		count--;
-		if (count == 0)
-		{
-			display_state();
+		n_steps++;
+		if (count == 0) {
+
+			display_state(my_state, n, w);
 			glfwSwapBuffers(window);
 			count = interval;
-
+			//std::cout << n_steps << '\n';
+			// std::cout << "Press enter to continue\n";
+      // getchar();
 		}
 		// Poll for and process events
 		glfwPollEvents();
+
 	}
 
 	glfwTerminate();
