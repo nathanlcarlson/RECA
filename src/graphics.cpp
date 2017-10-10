@@ -27,11 +27,12 @@ double j_coupling_energy(node i, node j) {
 
 double energy(State* t, int i, int j) {
 
-	return t->bonds(J)->get(i, j) * cos( 2 * M_PI * ( (*t)[i] - (*t)[j] - t->bonds(A)->get(i, j) ) );
+	//return t->bonds(J)->get(i, j) * cos( 2 * M_PI * ( (*t)[i] - (*t)[j] - t->bonds(A)->get(i, j) ) );
+	return cos( 2 * M_PI * ( (*t)[i] - (*t)[j] - t->bonds(A)->get(i, j) ) );
 
 }
 
-void display_state(State* state, int n, int w) {
+void display_state(State* state, int n, double w) {
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	int c = 0;
@@ -41,7 +42,6 @@ void display_state(State* state, int n, int w) {
 
 			glBegin(GL_TRIANGLES);
 			// Get color
-			//std::cout << (*state)[c] << '\n';
 			glColor3f(hueToRGB((*state)[c] + 0.3333),
 			          hueToRGB((*state)[c]),
 			          hueToRGB((*state)[c] - 0.3333));
@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 
 	seedRand( time(NULL) );
 
-	int n = 1 << 5;
+	int n = 1 << 8;
 	int n_nodes = n * n;
 	int n_states = 1;
 	// Display parameters
@@ -83,11 +83,12 @@ int main(int argc, char **argv) {
 
 	Bonds* bonds_A = new Bonds(A, n_nodes, a_coupling_energy);
 	Bonds* bonds_J = new Bonds(J, n_nodes, j_coupling_energy);
-	State* my_state = new State(n_nodes, n_states, beta, energy, bonds_A, bonds_J);
-
 	// Set up couplings
 	bonds_A->square2D(false);
+	bonds_A->scale_all( 1.0/n );
 	bonds_J->square2D(false);
+
+	State* my_state = new State(n_nodes, n_states, beta, energy, bonds_A, bonds_J);
 
 	// Choices of algorithms
 	RECA* my_reca = new RECA( my_state );
@@ -123,20 +124,18 @@ int main(int argc, char **argv) {
 	while (!glfwWindowShouldClose(window)) {
 
 		// Step the state forward
-		//my_metro->evolve_state();
-		// count--;
-		// n_steps++;
-		// if (count == 0) {
-		//
-		// 	display_state(my_state, n, w);
-		// 	glfwSwapBuffers(window);
-		// 	// count = interval;
-		// 	// std::cout << n_steps << '\n';
-		// 	// std::cout << "Press enter to continue\n";
-    //   // getchar();
-		// }
-		display_state(my_state, n, w);
-		glfwSwapBuffers(window);
+		my_metro->evolve_state();
+		count--;
+		n_steps++;
+		if (count == 0) {
+
+			display_state(my_state, n, w);
+			glfwSwapBuffers(window);
+			count = interval;
+			//std::cout << n_steps << '\n';
+			// std::cout << "Press enter to continue\n";
+      // getchar();
+		}
 		// Poll for and process events
 		glfwPollEvents();
 

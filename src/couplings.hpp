@@ -34,6 +34,7 @@ class StaticCouplings2D {
 		double get(int t_i, int t_j);
 		void square2D(bool periodic = true);
 		void print();
+		void scale_all( double factor );
 
 		Neighborhood::iterator begin(int i);
 		Neighborhood::iterator end(int i);

@@ -112,6 +112,18 @@ void StaticCouplings2D::print() {
 		c++;
 	}
 }
+void StaticCouplings2D::scale_all(double factor) {
+
+  for (CouplingsMap::iterator it = m_map.begin(); it != m_map.end(); ++it) {
+
+		for (auto& x : (*it)) {
+
+			x.second = x.second*factor;
+
+		}
+	}
+
+}
 void StaticCouplings2D::save_couplings() {
 
   for(int i = 0; i < m_size; i++) {
