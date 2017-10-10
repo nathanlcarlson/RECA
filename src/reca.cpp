@@ -27,7 +27,8 @@ double j_coupling_energy(node i, node j) {
 
 double energy(State* t, int i, int j) {
 
-	return t->bonds(J)->get(i, j) * cos( 2 * M_PI * ( (*t)[i] - (*t)[j] - t->bonds(A)->get(i, j) ) );
+	//return t->bonds(J)->get(i, j) * cos( 2 * M_PI * ( (*t)[i] - (*t)[j] - t->bonds(A)->get(i, j) ) );
+	return -1*cos( 2 * M_PI * ( (*t)[i] - (*t)[j] - t->bonds(A)->get(i, j) ) );
 
 }
 
@@ -48,6 +49,7 @@ int main(int argc, char **argv) {
 
 	// Set up couplings
 	bonds_A->square2D(false);
+	bonds_A->scale_all( 1.0/n );
 	bonds_J->square2D(false);
 
 	// Choices of algorithms
@@ -68,12 +70,15 @@ int main(int argc, char **argv) {
 	corfile.open(filename);
 	enrfile.open(filename+".enr");
 
-	corfile << "#Max dt " << max_dt
+	corfile << "# Max dt " << max_dt
 				  << ", N dt " << n_dt
 					<< ", freq RECA " << freq
 					<< "\n";
 
-
+	enrfile << "# Beta " << beta
+			<< ", freq RECA " << freq
+			<< ", n_nodes " << n_nodes
+			<< "\n";
 
 	int t = 0;
 	int t_start = 50000;

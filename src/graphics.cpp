@@ -124,7 +124,8 @@ int main(int argc, char **argv) {
 	while (!glfwWindowShouldClose(window)) {
 
 		// Step the state forward
-		my_metro->evolve_state();
+		//my_metro->evolve_state();
+		my_reca->evolve_state();
 		count--;
 		n_steps++;
 		if (count == 0) {
