@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 
 	seedRand( time(NULL) );
 
-	int n = 1 << 5;
+	int n = 1 << 6;
 	int n_nodes = n * n;
 	int n_states = 1;
 	// Physical parameter of system
@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
  			if(n_dts[dt] == n_dt) {
 
  				min_dt = dt + 1;
-
+				std::cout << min_dt << '\n';
  				if( min_dt == max_dt ) {
 
  					for (auto it=sum_dts.begin(); it!=sum_dts.end(); ++it)
@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
 		control = control_state->total_energy();
 		expr = my_state->total_energy();
 
-		enrfile << control << ' ' << expr <<'\n';
+		enrfile << expr/control <<'\n';
 
 		// Advance time
 		t++;

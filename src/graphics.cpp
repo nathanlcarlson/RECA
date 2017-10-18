@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 
 	seedRand( time(NULL) );
 
-	int n = 1 << 8;
+	int n = 1 << 7;
 	int n_nodes = n * n;
 	int n_states = 1;
 	// Display parameters
@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
 
 	// Loop until the user closes the window
 	// Only render according to interval
-	int interval = 1 << 10;
+	int interval = 1 << 5;
 	int count = interval;
 	int n_steps = 0;
 	while (!glfwWindowShouldClose(window)) {
