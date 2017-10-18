@@ -62,9 +62,9 @@ class RECA {
 
 		void q_swap(int i, int j) {
 
-			double E_i = m_state->energy(i, j);
+			double E_i = m_state->energy(i, j) + m_replica->energy(i, j);
 			swap(j);
-			double E_f = m_state->energy(i, j);
+			double E_f = m_state->energy(i, j) + m_replica->energy(i, j);;
 
 			double P = 1 - exp(2 * (m_state->B) * (E_f - E_i));
 
