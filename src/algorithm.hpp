@@ -69,6 +69,7 @@ class RECA {
 			double P = 1 - exp((m_state->B) * (E_f - E_i));
 
 			if ( rand0_1() < P ) {
+				m_cluster->add(j);
 				propigate(j);
 			}
 			else {
@@ -84,7 +85,6 @@ class RECA {
 
 				if (!(m_cluster->contains(j))) {
 
-					m_cluster->add(j);
 					q_swap(i, j);
 
 				}
