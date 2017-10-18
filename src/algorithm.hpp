@@ -66,7 +66,7 @@ class RECA {
 			swap(j);
 			double E_f = m_state->energy(i, j) + m_replica->energy(i, j);;
 
-			double P = 1 - exp(2 * (m_state->B) * (E_f - E_i));
+			double P = 1 - exp((m_state->B) * (E_f - E_i));
 
 			if ( rand0_1() < P ) {
 				propigate(j);
