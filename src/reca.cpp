@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
 		control = control_state->total_energy();
 		expr = my_state->total_energy();
 
-		enrfile << expr/control <<'\n';
+		enrfile << expr << ' ' << control <<'\n';
 
 		// Advance time
 		t++;
