@@ -12,7 +12,7 @@ ifeq ($(detected_OS),Darwin)  # Mac OS X
 endif
 ifeq ($(detected_OS),Linux)
     CXXFLAGS += -D LINUX
-	  GLIBS += $(LIBS) -lGL -lglfw -Wl,-rpath,/usr/local/lib
+	  GLIBS += $(LIBS) -lGL -lglfw3 -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl -lXinerama -lXcursor
 endif
 
 graphics: $(OBJS) obj/graphics.o
