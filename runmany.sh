@@ -1,0 +1,9 @@
+./reca data/L10/beta1/freq0/0 10 1 0 100000
+./reca data/L10/beta1/freq0/1 10 1 0 100000
+./reca data/L10/beta1/freq0/2 10 1 0 100000
+./reca data/L10/beta1/freq1/0 10 1 1 100000
+./reca data/L10/beta1/freq1/1 10 1 1 100000
+./reca data/L10/beta1/freq1/2 10 1 1 100000
+./reca data/L10/beta1/freq5/0 10 1 5 100000
+./reca data/L10/beta1/freq5/1 10 1 5 100000
+./reca data/L10/beta1/freq5/2 10 1 5 100000
