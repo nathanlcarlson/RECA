@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 	std::ofstream corfile;
 	std::ofstream enrfile;
 	std::string filename = argv[1];
-	corfile.open(filename+".conf");
+	corfile.open(filename);
 	enrfile.open(filename+".enr");
 
   

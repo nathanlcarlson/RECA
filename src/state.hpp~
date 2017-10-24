@@ -156,7 +156,24 @@ class State {
 			return E;
 
 		}
+		double total_energy_t(int t) {
 
+			double E = 0;
+
+			for(int i = 0; i < m_L; i++) {
+
+				for (auto neighbor = m_bonds[0]->begin(i); neighbor != m_bonds[0]->end(i); ++neighbor) {
+
+					if( i < *neighbor) {
+
+						E += energy_t(t, i, *neighbor);
+					}
+				}
+			}
+
+			return E;
+
+		}
 		int size() {
 
 			return m_v.size();
