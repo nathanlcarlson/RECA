@@ -3,8 +3,7 @@ import matplotlib.pyplot as plt
 import argparse
 def main():
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('-e','--energy', dest='filenames', nargs='+',
-                        help='')
+    
     parser.add_argument('-c','--conf', dest='conffiles', nargs='+',
                         help='')
 
