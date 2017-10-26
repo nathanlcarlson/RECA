@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import argparse
 import os
 def main():
@@ -12,7 +13,7 @@ def main():
                         help='')
     parser.add_argument('-n','--samples', dest='samples', type=int,
                         help='')
-    parser.add_argument('-r','--root', dest='root', default = "data", nargs='+',
+    parser.add_argument('-r','--root', dest='root', default = "data",
                         help='')
     args = parser.parse_args()
     
