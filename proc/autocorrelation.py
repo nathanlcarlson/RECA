@@ -8,8 +8,11 @@ def main():
                         help='')
 
     args = parser.parse_args()
-    n = 100
+    # Number of times to sample a simulation
+    n = 10
+    # Time interval, lag
     w = 900
+    # Time to start at
     start = w*10
     handles = [""]*n
     auto_correlations = []

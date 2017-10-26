@@ -13,9 +13,9 @@ def main():
   control = avg_energy(args.control)
   expr = avg_energy(args.energy)
   
-  plt.plot(control)
-  plt.plot(expr)
-  
+  controlhandles, = plt.plot(control, label = "Control")
+  exprhandles, = plt.plot(expr, label = "Expiermental")
+  plt.legend( [controlhandles, exprhandles], ["Control", "Experimental"] )
   plt.show()
   
 def avg_energy(data_files):
