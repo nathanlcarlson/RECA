@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 
 	Bonds* bonds_A = new Bonds(A, n_nodes, a_coupling_energy);
 	Bonds* bonds_J = new Bonds(J, n_nodes, j_coupling_energy);
-	
+
 	State* my_state = new State(n_nodes, n_states, beta, energy, bonds_A, bonds_J);
 
 	// Set up couplings
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
 	corfile.open(filename+".conf");
 	enrfile.open(filename+".enr");
 
-  
+
 	corfile << "# Beta " << beta
 			    << ", freq RECA " << freq
 			    << ", n_nodes " << n_nodes
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 			    << ", freq RECA " << freq
 			    << ", n_nodes " << n_nodes
 			    << "\n";
-  
+
   std::vector<double> expr;
   expr.resize(t_stop);
 
@@ -109,17 +109,18 @@ int main(int argc, char **argv) {
 	// Write to disk
 	std::cout << "Writing to disk..\n";
 	for(int tau = 0; tau < t_stop; tau++) {
-	
+
 	  enrfile << expr[tau] << '\n';
-	  
+
 	  for(int j = 0; j < n_nodes; j++) {
-	  
+
 	    corfile << 2*M_PI*my_state->get_history(tau, j) << ' ';
-	    
+
 	  }
 	  corfile << '\n';
 
 	}
-
+	corfile.close();
+	enrfile.close();
 	return 0;
 }
