@@ -156,6 +156,7 @@ class State {
 			return E;
 
 		}
+
 		int size() {
 
 			return m_v.size();
