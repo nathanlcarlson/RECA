@@ -4,19 +4,19 @@ import os
 def main():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-b','--beta', dest='betas', nargs='+',
-                        help='')
+                        help='Inverse temperature')
     parser.add_argument('-t','--steps', dest='steps', default = "100000",
-                        help='')
+                        help='Number of Monte Carlo steps in a simulation')
     parser.add_argument('-f','--freq', dest='freqs', nargs='+',
-                        help='')
+                        help='Percentage of RECA moves to use, 0 - 100')
     parser.add_argument('-L','--width', dest='width', nargs='+',
-                        help='')
-    parser.add_argument('-n','--samples', dest='samples', type=int,
-                        help='')
+                        help='The width of the lattice to simulate')
+    parser.add_argument('-n','--samples', dest='samples', type=int, default = 1,
+                        help='Number of simulations to do for each unique parameter set')
     parser.add_argument('-r','--root', dest='root', default = "data",
-                        help='')
+                        help='The root directory to store data in')
     args = parser.parse_args()
-    
+
     m_dict = {}
     for L in args.width:
       m_dict[L] = {}
@@ -28,14 +28,14 @@ def main():
           m_dict[L][beta][freq]['files']['energy'] = []
           m_dict[L][beta][freq]['files']['conf'] = []
           for c in range(args.samples):
-            
+
             path = args.root+"/L"+L+"/beta"+beta+"/freq"+freq
             mkdirs(path)
             path = path+"/"+str(c)
             print path
             m_dict[L][beta][freq]['files']['conf'].append(path+".conf")
             m_dict[L][beta][freq]['files']['energy'].append(path+".enr")
-            os.system("./reca " + 
+            os.system("./reca " +
                        path + " " +
                        L + " " +
                        beta + " " +
@@ -44,13 +44,13 @@ def main():
                      )
 
           #os.system("python proc/energy.py -c "+ " ".join(controls) + " -e " + " ".join(expr))
-          
-          
+
+
 def mkdirs(path):
   try:
     os.makedirs(path)
   except OSError:
     pass
-    
-                          
+
+
 main()
