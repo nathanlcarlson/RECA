@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import argparse
 import os
+import subprocess
 def main():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-b','--beta', dest='betas', nargs='+',
@@ -24,26 +25,21 @@ def main():
         m_dict[L][beta] = {}
         for freq in args.freqs:
           m_dict[L][beta][freq] = {}
-          m_dict[L][beta][freq]['files'] = {}
-          m_dict[L][beta][freq]['files']['energy'] = []
-          m_dict[L][beta][freq]['files']['conf'] = []
+          m_dict[L][beta][freq]['process'] = []
           for c in range(args.samples):
 
             path = args.root+"/L"+L+"/beta"+beta+"/freq"+freq
             mkdirs(path)
             path = path+"/"+str(c)
-            print path
-            m_dict[L][beta][freq]['files']['conf'].append(path+".conf")
-            m_dict[L][beta][freq]['files']['energy'].append(path+".enr")
-            os.system("./reca " +
-                       path + " " +
-                       L + " " +
-                       beta + " " +
-                       freq + " " +
-                       args.steps
-                     )
-
-          #os.system("python proc/energy.py -c "+ " ".join(controls) + " -e " + " ".join(expr))
+            m_dict[L][beta][freq]['process'].append(subprocess.Popen(["./reca",
+                                                                  path,
+                                                                  L,
+                                                                  beta,
+                                                                  freq,
+                                                                  args.steps
+                                                                 ],
+                                                                  stdout=subprocess.PIPE,
+                                                                  stderr=subprocess.STDOUT))
 
 
 def mkdirs(path):
@@ -51,6 +47,5 @@ def mkdirs(path):
     os.makedirs(path)
   except OSError:
     pass
-
 
 main()
