@@ -1,7 +1,8 @@
-CXX := g++
-CXXFLAGS := -std=c++11 -O2 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
-INCLUDES := -I/usr/local/include -I.
+CXX := c++
+CXXFLAGS := -std=c++11 -O2 -Wall -Wextra -Wnon-virtual-dtor -pedantic
+INCLUDES := -I/usr/local/include -I. -I/usr/local/include/mongocxx/v_noabi -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/bsoncxx/v_noabi -I/usr/local/include/libbson-1.0
 LIBS := -L/usr/local/lib
+MLIBS := -L/usr/local/lib -lmongocxx -lbsoncxx
 OBJS :=  obj/couplings.o obj/utils.o
 HPP := $(wildcard src/*.hpp)
 
@@ -18,9 +19,9 @@ endif
 graphics: $(OBJS) obj/graphics.o
 	$(CXX) $(INCLUDES) -o $@ $^ $(GLIBS)
 reca: $(OBJS) obj/reca.o
-	$(CXX) $(INCLUDES) -o $@ $^ $(LIBS)
+	$(CXX) $(INCLUDES) -o $@ $^ $(LIBS) $(MLIBS) -Wl,-rpath=/usr/local/lib/
 obj/%.o: src/%.cpp $(HPP)
-	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $< -Wl,-rpath=/usr/local/lib/
 
 experiment:
 	$(CXX) $(INCLUDES) $(CXXFLAGS) src/experiment.cpp -o experiment
