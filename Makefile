@@ -3,7 +3,8 @@ CXXFLAGS := -std=c++11 -O2 -Wall -Wextra -Wnon-virtual-dtor -pedantic
 INCLUDES := -I/usr/local/include -I. -I/usr/local/include/mongocxx/v_noabi -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/bsoncxx/v_noabi -I/usr/local/include/libbson-1.0
 LIBS := -L/usr/local/lib
 MLIBS := -L/usr/local/lib -lmongocxx -lbsoncxx
-OBJS :=  obj/couplings.o obj/utils.o
+OBJDIR := obj
+OBJS :=  $(addprefix $(OBJDIR)/,couplings.o utils.o)
 HPP := $(wildcard src/*.hpp)
 
 detected_OS := $(shell uname -s)
@@ -20,9 +21,10 @@ graphics: $(OBJS) obj/graphics.o
 	$(CXX) $(INCLUDES) -o $@ $^ $(GLIBS)
 reca: $(OBJS) obj/reca.o
 	$(CXX) $(INCLUDES) -o $@ $^ $(LIBS) $(MLIBS) -Wl,-rpath=/usr/local/lib/
-obj/%.o: src/%.cpp $(HPP)
+obj/%.o: src/%.cpp $(HPP) | $(OBJDIR)
 	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $< -Wl,-rpath=/usr/local/lib/
-
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
 experiment:
 	$(CXX) $(INCLUDES) $(CXXFLAGS) src/experiment.cpp -o experiment
 
