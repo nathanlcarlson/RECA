@@ -120,8 +120,9 @@ int main(int argc, char **argv) {
 	bsoncxx::document::value meta_doc = metaBSON << bsoncxx::builder::stream::finalize;
 
 
-	mongocxx::instance inst{};
-	mongocxx::client conn{mongocxx::uri{}};
+	mongocxx::instance instance{}; // This should be done only once.
+	mongocxx::uri uri("mongodb://mongo:27017");
+	mongocxx::client client(uri);
 	auto db = conn["test"];
 	auto collection = conn["test"]["data"];
 	mongocxx::v_noabi::options::gridfs::upload options;
