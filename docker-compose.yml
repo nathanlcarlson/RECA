@@ -1,0 +1,12 @@
+version: '0'
+services:
+  db:
+    image: "mongo"
+    ports:
+     - "27017:27017"
+  reca:
+    build: "reca"
+    ports:
+     - "4000:80"
+    links:
+     - db
