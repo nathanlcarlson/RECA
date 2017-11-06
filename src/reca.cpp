@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
 
 	mongocxx::instance instance{}; // This should be done only once.
 	mongocxx::uri uri("mongodb://mongo:27017");
-	mongocxx::client client(uri);
+	mongocxx::client conn(uri);
 	auto db = conn["test"];
 	auto collection = conn["test"]["data"];
 	mongocxx::v_noabi::options::gridfs::upload options;
