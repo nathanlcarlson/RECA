@@ -121,7 +121,10 @@ int main(int argc, char **argv) {
 
 
 	mongocxx::instance instance{}; // This should be done only once.
-	mongocxx::uri uri("mongodb://mongo:27017");
+	std::string server = "mongodb://";
+	server += argv[1];
+	server += ":27017";
+	mongocxx::uri uri(server);
 	mongocxx::client conn(uri);
 	auto db = conn["test"];
 	auto collection = conn["test"]["data"];
