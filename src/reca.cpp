@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
 
 
 	mongocxx::instance instance{}; // This should be done only once.
-	mongocxx::uri uri("mongo://mongo:27017");
+	mongocxx::uri uri("mongodb://mongo:27017");
 	mongocxx::client conn(uri);
 	auto db = conn["test"];
 	auto collection = conn["test"]["data"];
