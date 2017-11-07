@@ -21,6 +21,7 @@ class State {
 		std::vector <StaticCouplings2D*> m_bonds;
 		std::map <char, StaticCouplings2D*> m_bonds_map;
 		std::vector <double> m_v;
+		std::vector <double> m_energy_history;
 		std::vector <std::vector <double>> m_history;
 
 	public:
@@ -106,6 +107,7 @@ class State {
 		void save() {
 
 			m_history.push_back(m_v);
+			m_energy_history.push_back(total_energy());
 
 		}
 
@@ -128,16 +130,19 @@ class State {
 			return m_v[i];
 
 		}
+
 		StaticCouplings2D* bonds(char id) {
 
 			return m_bonds_map[id];
 
 		}
+
 		StaticCouplings2D* bonds() {
 
 			return m_bonds[0];
 
 		}
+
 		double total_energy() {
 
 			double E = 0;
@@ -157,10 +162,25 @@ class State {
 
 		}
 
+		std::vector<std::vector<double>> history(){
+
+			return m_history;
+		}
+
+		std::vector<double> energy_history(){
+
+			return m_energy_history;
+		}
+
 		int size() {
 
 			return m_v.size();
 
+		}
+
+		int steps() {
+
+			return m_history.size();
 		}
 };
 #endif
