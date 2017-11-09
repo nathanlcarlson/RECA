@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
   automake autoconf libtool \
   python \
   python-pip \
-  libfftw3-3
+  libfftw3-3 \
+  libfftw3-dev
 
 WORKDIR /tmp
 

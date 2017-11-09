@@ -17,19 +17,23 @@ def hello():
 
     print form.errors
     if request.method == 'POST':
+
         beta = request.form['beta']
-        L =request.form['width']
+        L = request.form['width']
         freq = request.form['freq']
         steps = request.form['steps']
-        subprocess.Popen(["./reca",
-                          dbname,
-                          L,
-                          beta,
-                          freq,
-                          steps
-                         ],
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.STDOUT)
+        if request.form['submit'] == "Graph":
+            
+        if request.form['submit'] == "Run":
+            subprocess.Popen(["./reca",
+                              dbname,
+                              L,
+                              beta,
+                              freq,
+                              steps
+                             ],
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT)
 
 
     return render_template('hello.html', form=form)
@@ -63,7 +67,7 @@ def simple():
     response=make_response(png_output.getvalue())
     response.headers['Content-Type'] = 'image/png'
 
-return response
+    return response
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=80)
 
