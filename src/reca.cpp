@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 	double beta = atof(argv[3]);
 	double freq = atof(argv[4])/100.0;
 	int t = 0;
-  int t_stop = atoi(argv[5]);
+  int t_stop = 1 << 15;//atoi(argv[5]);
 	Args params;
 	params["L"] = n_nodes;
 	params["W"] = n;
@@ -70,10 +70,6 @@ int main(int argc, char **argv) {
 	RECA* my_reca = new RECA( my_state );
 	Metropolis* my_metro = new Metropolis( my_state );
 
-
-  std::vector<double> expr;
-  expr.resize(t_stop);
-
 	// Gather metrics
 	while (t < t_stop) {
 
@@ -93,6 +89,14 @@ int main(int argc, char **argv) {
 
 	}
 	DBWriter<Args> db_writer(my_state, hostalias, "test", params);
-	db_writer.write_all();
+	//db_writer.write_all();
+
+	std::vector<double> out;
+	double avg_energy = my_state->calc_avg_energy(t_stop);
+	for(const auto &energy : my_state->energy_history()) {
+		out.push_back(energy - avg_energy);
+	}
+	db_writer.write_vector("EnergyAC", autocorrelation(out));
+
 	return 0;
 }

@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
   pkg-config libssl-dev libsasl2-dev \
   automake autoconf libtool \
   python \
-  python-pip
+  python-pip \
+  libfftw3-3
 
 WORKDIR /tmp
 

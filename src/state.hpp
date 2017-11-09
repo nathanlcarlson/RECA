@@ -37,7 +37,6 @@ class State {
 				m_bonds_map[(*it)->id] = *it;
 			}
 			m_v.resize(t_L);
-			//seedRand( time(NULL) );
 			randomize_all();
 
 		}
@@ -160,6 +159,16 @@ class State {
 
 			return E;
 
+		}
+
+		double calc_avg_energy(const int t_steps) {
+
+			double s = 0;
+			for(const auto &energy : m_energy_history) {
+				s += energy;
+			}
+			s /= t_steps;
+			return s;
 		}
 
 		std::vector<std::vector<double>> history(){

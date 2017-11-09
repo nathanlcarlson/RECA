@@ -58,7 +58,24 @@ class DBWriter{
     	auto energy_doc = after_enr_array << bsoncxx::builder::stream::finalize;
       auto energy_result = collection.insert_one(energy_doc.view());
     }
+    void write_vector(std::string key, std::vector<double> v) {
 
+      mongocxx::uri uri(m_host);
+    	mongocxx::client conn(uri);
+    	auto db = conn[m_db];
+      auto collection = db["data"];
+      auto builder = get_metaBSON();
+      auto array = builder << key << bsoncxx::builder::stream::open_array;
+    	for(const auto &value : v) {
+
+    	  array << value;
+
+    	}
+    	auto after_array = array << bsoncxx::builder::stream::close_array;
+    	auto doc = after_array << bsoncxx::builder::stream::finalize;
+      auto result = collection.insert_one(doc.view());
+
+    }
     void write_history() {
 
     	mongocxx::uri uri(m_host);

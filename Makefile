@@ -2,7 +2,7 @@ CXX := c++
 CXXFLAGS := -std=c++11 -O2 -Wall -Wextra -Wnon-virtual-dtor -pedantic
 INCLUDES := -I/usr/local/include -I. -I/usr/local/include/mongocxx/v_noabi -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/bsoncxx/v_noabi -I/usr/local/include/libbson-1.0
 LIBS := -L/usr/local/lib
-MLIBS := -L/usr/local/lib -lmongocxx -lbsoncxx -lpthread
+MLIBS := -L/usr/local/lib -lmongocxx -lbsoncxx -lpthread -lfftw3
 OBJDIR := obj
 OBJS :=  $(addprefix $(OBJDIR)/,couplings.o utils.o)
 HPP := $(wildcard src/*.hpp)

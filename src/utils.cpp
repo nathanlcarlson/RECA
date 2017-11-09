@@ -34,6 +34,49 @@ int mod( int a, int b ) {
   return c;
 
 }
+std::vector<double> autocorrelation(std::vector<double> _s) {
+
+  const int N = _s.size();
+  const int fftN = 2*N;
+  fftw_complex in[fftN], res[fftN]; /* double [2] */
+  fftw_plan p, q;
+  int i;
+
+  p = fftw_plan_dft_1d(fftN, in, in, FFTW_FORWARD, FFTW_ESTIMATE);
+  q = fftw_plan_dft_1d(fftN, res, res, FFTW_BACKWARD, FFTW_ESTIMATE);
+
+  for (i = 0; i < N; i++) {
+    in[i][0] = _s[i];
+    in[i][1] = 0;
+  }
+  for (i = N; i < fftN; i++) {
+    in[i][0] = 0;
+    in[i][1] = 0;
+  }
+
+
+  /* forward Fourier transform, save the result in 'out' */
+
+  fftw_execute(p);
+
+  for (i = 0; i < fftN; i++) {
+
+    res[i][0] = (in[i][0]*in[i][0] + in[i][1]*in[i][1]);
+    res[i][1] = 0;
+
+  }
+
+  fftw_execute(q);
+  /* normalize */
+  for (i = 0; i < N; i++) {
+    _s[i] = res[i][0]/fftN;
+  }
+
+  fftw_destroy_plan(p);
+  fftw_destroy_plan(q);
+  fftw_cleanup();
+  return _s;
+}
 
 node make_node(int x, int y, int z) {
 
