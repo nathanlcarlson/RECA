@@ -28,11 +28,9 @@ def main():
           m_dict[L][beta][freq]['process'] = []
           for c in range(args.samples):
 
-            path = args.root+"/L"+L+"/beta"+beta+"/freq"+freq
-            mkdirs(path)
-            path = path+"/"+str(c)
+            host = 'localhost'
             m_dict[L][beta][freq]['process'].append(subprocess.Popen(["./reca",
-                                                                  path,
+                                                                  host,
                                                                   L,
                                                                   beta,
                                                                   freq,
