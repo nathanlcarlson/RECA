@@ -48,9 +48,9 @@ class RECA {
 
 		int m_L;
 
-		State *m_state;
-		State *m_replica;
-		Cluster *m_cluster;
+		std::shared_ptr<State> m_state;
+		std::unique_ptr<State> m_replica;
+		std::unique_ptr<Cluster> m_cluster;
 
 		void swap(int j) {
 
@@ -92,14 +92,12 @@ class RECA {
 		}
 
 	public:
-		RECA(State *t_state)
+		RECA(std::shared_ptr<State> t_state)
+			: m_state(t_state)
 		{
-
-			m_state = t_state;
 			m_L = m_state->size();
-			m_replica = new State( *m_state );
-			m_cluster = new Cluster( m_L );
-
+			m_replica = std::make_unique<State>( *m_state );
+			m_cluster = std::make_unique<Cluster>( m_L );
 		}
 		void evolve_state() {
 
@@ -139,13 +137,13 @@ class Metropolis {
 	private:
 
 		int m_L;
-		State *m_state;
+		std::shared_ptr<State> m_state;
 
 	public:
 
-		Metropolis(State *t_state)
+		Metropolis(std::shared_ptr<State> t_state)
+			: m_state(t_state)
 		{
-			m_state = t_state;
 			m_L = m_state->size();
 		}
 

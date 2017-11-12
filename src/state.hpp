@@ -11,6 +11,7 @@
 class State {
 
 	typedef std::function <double (State*, int, int)> EnergyFunction_Ptr;
+	typedef StaticCouplings2D Bonds;
 
 	private:
 
@@ -18,8 +19,8 @@ class State {
 		double m_L;
 
 		EnergyFunction_Ptr m_energy;
-		std::vector <StaticCouplings2D*> m_bonds;
-		std::map <char, StaticCouplings2D*> m_bonds_map;
+		std::vector <std::shared_ptr<Bonds>> m_bonds;
+		std::map <char, std::shared_ptr<Bonds>> m_bonds_map;
 		std::vector <double> m_v;
 		std::vector <double> m_energy_history;
 		std::vector <std::vector <double>> m_history;
@@ -28,12 +29,12 @@ class State {
 
 		double B;
 
-		template< typename... Args>
-		State(int t_L, int t_N, int t_B, EnergyFunction_Ptr t_f, Args ...t_bonds)
-			: B(t_B), m_energy(t_f), m_N(t_N), m_L(t_L), m_bonds({t_bonds...})
+		template< typename TBonds >
+		State(int t_L, int t_N, int t_B, EnergyFunction_Ptr t_f, TBonds t_bonds)
+			: B(t_B), m_energy(t_f), m_N(t_N), m_L(t_L)
 		{
 
-			for( auto it = m_bonds.begin(); it != m_bonds.end(); it++) {
+			for( auto it = t_bonds.begin(); it != t_bonds.end(); it++) {
 				m_bonds_map[(*it)->id] = *it;
 			}
 			m_v.resize(t_L);
@@ -41,7 +42,7 @@ class State {
 
 		}
 
-		double energy(int i, int j) {
+		double energy(const int i, const int j) {
 
 			return m_energy(this, i, j);
 
@@ -130,13 +131,13 @@ class State {
 
 		}
 
-		StaticCouplings2D* bonds(char id) {
+		std::shared_ptr<Bonds> bonds(char id) {
 
 			return m_bonds_map[id];
 
 		}
 
-		StaticCouplings2D* bonds() {
+		std::shared_ptr<Bonds> bonds() {
 
 			return m_bonds[0];
 

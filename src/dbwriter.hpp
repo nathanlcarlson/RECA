@@ -16,10 +16,10 @@ class DBWriter{
     std::string m_host;
     std::string m_db;
     T m_params;
-    State* m_s;
+    std::shared_ptr<State> m_s;
   public:
 
-    DBWriter(State *_s, std::string _hostalias, std::string _db, T _params )
+    DBWriter(std::shared_ptr<State> _s, std::string _hostalias, std::string _db, T _params )
       : m_s(_s), m_db(_db), m_params(_params)
       {
         m_host = "mongodb://"+_hostalias+":27017";

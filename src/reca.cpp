@@ -56,19 +56,19 @@ int main(int argc, char **argv) {
 	params["Freq"] = freq*100;
 	params["Steps"] = t_stop;
 
-	Bonds* bonds_A = new Bonds(A, n_nodes, a_coupling_energy);
-	Bonds* bonds_J = new Bonds(J, n_nodes, j_coupling_energy);
-
-	State* my_state = new State(n_nodes, n_states, beta, energy, bonds_A, bonds_J);
+	auto bonds_A = std::make_shared<Bonds>(A, n_nodes, a_coupling_energy);
+	//auto bonds_J = std::make_shared<Bonds>(J, n_nodes, j_coupling_energy);
+	std::vector<std::shared_ptr<Bonds>> bonds{bonds_A};
+	auto my_state = std::make_shared<State>(n_nodes, n_states, beta, energy, bonds);
 
 	// Set up couplings
 	bonds_A->square2D(false);
 	//bonds_A->scale_all( 1.0/n );
-	bonds_J->square2D(false);
+	//bonds_J->square2D(false);
 
 	// Choices of algorithms
-	RECA* my_reca = new RECA( my_state );
-	Metropolis* my_metro = new Metropolis( my_state );
+	auto my_reca = std::make_unique<RECA>( my_state );
+	auto my_metro = std::make_unique<Metropolis>( my_state );
 
 	// Gather metrics
 	while (t < t_stop) {
