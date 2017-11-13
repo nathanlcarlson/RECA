@@ -15,7 +15,6 @@ class State {
 
 	private:
 
-		double m_N;
 		double m_L;
 
 		EnergyFunction_Ptr m_energy;
@@ -30,12 +29,12 @@ class State {
 		double B;
 
 		template< typename TBonds >
-		State(int t_L, int t_N, int t_B, EnergyFunction_Ptr t_f, TBonds t_bonds)
-			: B(t_B), m_energy(t_f), m_N(t_N), m_L(t_L)
+		State(int t_L, int t_B, EnergyFunction_Ptr t_f, TBonds t_bonds)
+			: B(t_B), m_energy(t_f), m_L(t_L), m_bonds(t_bonds)
 		{
 
-			for( auto it = t_bonds.begin(); it != t_bonds.end(); it++) {
-				m_bonds_map[(*it)->id] = *it;
+			for( const auto& b: t_bonds ) {
+				m_bonds_map[b->id] = b;
 			}
 			m_v.resize(t_L);
 			randomize_all();
@@ -50,42 +49,18 @@ class State {
 
 		void shift_all() {
 
-			double r;
-
-			if(m_N == 1) {
-				r = rand0_1();
-			}
-			else {
-				r = randN(m_N)/(double)m_N;
-			}
-
+			double r = rand0_1();
 			int n = m_v.size();
 
-			for (int i = 0; i < n; i++) {
-
-				m_v[i] += r;
-				if (m_v[i] >= 1.0) {
-
-					m_v[i] -= 1.0;
-
-				}
-			}
+			std::for_each(m_v.begin(), m_v.end(), [r](double &n){ n+=r;
+																														if(n>=1.0) n-=1.0;
+																													});
 		}
 
 		void randomize_all() {
 
-			if(m_N == 1) {
-				std::generate( m_v.begin(), m_v.end(), rand0_1 );
-			}
-			else {
-				int n = m_v.size();
-				for(int i = 0; i < n; i++) {
+			std::generate( m_v.begin(), m_v.end(), rand0_1 );
 
-					double r = randN(m_N)/(double)m_N;
-					m_v[i] = r;
-
-				}
-			}
 		}
 
 		int randomize_one(int i = -1) {
@@ -94,12 +69,7 @@ class State {
 				i = randN(m_v.size());
 			}
 
-			if(m_N == 1) {
-				m_v[i] = rand0_1();
-			}
-			else {
-				m_v[i] = randN(m_N)/(double)m_N;
-			}
+			m_v[i] = rand0_1();
 
 			return i;
 		}
@@ -118,8 +88,8 @@ class State {
 		void print() {
 
 			std::cout << "State contains:";
-			for (std::vector <double>::iterator it = m_v.begin(); it != m_v.end(); ++it) {
-				std::cout << ' ' << *it;
+			for (const auto& site: m_v) {
+				std::cout << ' ' << site;
 			}
 			std::cout << '\n';
 
@@ -162,22 +132,12 @@ class State {
 
 		}
 
-		double calc_avg_energy(const int t_steps) {
-
-			double s = 0;
-			for(const auto &energy : m_energy_history) {
-				s += energy;
-			}
-			s /= t_steps;
-			return s;
-		}
-
 		std::vector<std::vector<double>> history(){
 
 			return m_history;
 		}
 
-		std::vector<double> energy_history(){
+		std::vector<double>& energy_history(){
 
 			return m_energy_history;
 		}

@@ -34,7 +34,7 @@ int mod( int a, int b ) {
   return c;
 
 }
-std::vector<double> autocorrelation(std::vector<double> _s) {
+std::vector<double>& autocorrelation(std::vector<double> _s) {
 
   const int N = _s.size();
   const int fftN = 2*N;

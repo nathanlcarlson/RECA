@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include <memory>
 #include <math.h>
 
@@ -27,10 +28,20 @@ double j_coupling_energy(node i, node j) {
 
 }
 
-double energy(State* t, int i, int j) {
+double energy(State* s, int i, int j) {
 
 	//return t->bonds(J)->get(i, j) * cos( 2 * M_PI * ( (*t)[i] - (*t)[j] - t->bonds(A)->get(i, j) ) );
-	return -1*cos( 2 * M_PI * ( (*t)[i] - (*t)[j] - t->bonds(A)->get(i, j) ) );
+	return -1*cos( 2 * M_PI * ( (*s)[i] - (*s)[j] - s->bonds(A)->get(i, j) ) );
+
+}
+
+double avg_energy(std::vector<double>& s, const int t ) {
+
+	double sum = 0;
+	for(const auto& site: s) {
+		sum += site;
+	}
+	return sum / t;
 
 }
 
@@ -44,11 +55,10 @@ int main(int argc, char **argv) {
 	std::string hostalias(argv[1]);
 	int n = atoi(argv[2]);
 	int n_nodes = n * n;
-	int n_states = 1;
 	double beta = atof(argv[3]);
 	double freq = atof(argv[4])/100.0;
 	int t = 0;
-  int t_stop = 1 << 15;//atoi(argv[5]);
+  int t_stop = atoi(argv[5]);
 	Args params;
 	params["L"] = n_nodes;
 	params["W"] = n;
@@ -59,7 +69,7 @@ int main(int argc, char **argv) {
 	auto bonds_A = std::make_shared<Bonds>(A, n_nodes, a_coupling_energy);
 	//auto bonds_J = std::make_shared<Bonds>(J, n_nodes, j_coupling_energy);
 	std::vector<std::shared_ptr<Bonds>> bonds{bonds_A};
-	auto my_state = std::make_shared<State>(n_nodes, n_states, beta, energy, bonds);
+	auto my_state = std::make_shared<State>(n_nodes, beta, energy, bonds);
 
 	// Set up couplings
 	bonds_A->square2D(false);
@@ -69,7 +79,6 @@ int main(int argc, char **argv) {
 	// Choices of algorithms
 	auto my_reca = std::make_unique<RECA>( my_state );
 	auto my_metro = std::make_unique<Metropolis>( my_state );
-
 	// Gather metrics
 	while (t < t_stop) {
 
@@ -88,15 +97,16 @@ int main(int argc, char **argv) {
 		t++;
 
 	}
-	DBWriter<Args> db_writer(my_state, hostalias, "test", params);
-	//db_writer.write_all();
 
-	std::vector<double> out;
-	double avg_energy = my_state->calc_avg_energy(t_stop);
+	std::vector<double> mean_sub;
+	double avg_energy = calc_avg_energy(my_state->energy_history(), t_stop);
 	for(const auto &energy : my_state->energy_history()) {
-		out.push_back(energy - avg_energy);
+		mean_sub.push_back(energy - avg_energy);
 	}
-	db_writer.write_vector("EnergyAC", autocorrelation(out));
+
+	DBWriter<Args> db_writer(my_state, hostalias, "test", params);
+	db_writer.write_vector("Energy", my_state->energy_history());
+	db_writer.write_vector("EnergyAC", autocorrelation(mean_sub));
 
 	return 0;
 }

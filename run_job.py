@@ -6,7 +6,7 @@ def main():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-b','--beta', dest='betas', nargs='+',
                         help='Inverse temperature')
-    parser.add_argument('-t','--steps', dest='steps', default = "100000",
+    parser.add_argument('-t','--steps', dest='steps', default = str(pow(2,15)),
                         help='Number of Monte Carlo steps in a simulation')
     parser.add_argument('-f','--freq', dest='freqs', nargs='+',
                         help='Percentage of RECA moves to use, 0 - 100')
@@ -14,8 +14,8 @@ def main():
                         help='The width of the lattice to simulate')
     parser.add_argument('-n','--samples', dest='samples', type=int, default = 1,
                         help='Number of simulations to do for each unique parameter set')
-    parser.add_argument('-r','--root', dest='root', default = "data",
-                        help='The root directory to store data in')
+    parser.add_argument('-H','--host', dest='host', default = "localhost",
+                        help='The mongodb host')
     args = parser.parse_args()
 
     m_dict = {}
@@ -28,9 +28,9 @@ def main():
           m_dict[L][beta][freq]['process'] = []
           for c in range(args.samples):
 
-            host = 'localhost'
+
             m_dict[L][beta][freq]['process'].append(subprocess.Popen(["./reca",
-                                                                  host,
+                                                                  args.host,
                                                                   L,
                                                                   beta,
                                                                   freq,

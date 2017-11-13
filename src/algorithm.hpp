@@ -122,7 +122,7 @@ class RECA {
 
 					if( i < *neighbor) {
 
-						E += m_state->energy(i, *neighbor) + m_replica->energy(i, *neighbor);
+						E += m_state->energy(i, *neighbor);// + m_replica->energy(i, *neighbor);
 					}
 				}
 			}

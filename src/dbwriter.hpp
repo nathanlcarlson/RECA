@@ -32,33 +32,7 @@ class DBWriter{
     	return metaBSON;
     }
 
-    void write_all() {
-      std::thread th1 ( &DBWriter<T>::write_history, this );
-      std::thread th2 ( &DBWriter<T>::write_energy, this  );
-      th1.join();
-      th2.join();
-
-
-    }
-
-    void write_energy() {
-
-      mongocxx::uri uri(m_host);
-    	mongocxx::client conn(uri);
-    	auto db = conn[m_db];
-      auto collection = db["data"];
-      auto builder = get_metaBSON();
-      auto enr_array = builder << "Energy" << bsoncxx::builder::stream::open_array;
-    	for(const auto &energy : m_s->energy_history()) {
-
-    	  enr_array << energy;
-
-    	}
-    	auto after_enr_array = enr_array << bsoncxx::builder::stream::close_array;
-    	auto energy_doc = after_enr_array << bsoncxx::builder::stream::finalize;
-      auto energy_result = collection.insert_one(energy_doc.view());
-    }
-    void write_vector(std::string key, std::vector<double> v) {
+    void write_vector(std::string key, std::vector<double>& v) {
 
       mongocxx::uri uri(m_host);
     	mongocxx::client conn(uri);
