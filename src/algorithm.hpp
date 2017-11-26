@@ -45,7 +45,7 @@ class Cluster {
 class RECA {
 
 	private:
-
+		double m_R;
 		int m_L;
 
 		std::shared_ptr<State> m_state;
@@ -59,10 +59,21 @@ class RECA {
 			(*m_state)[j] = tmp;
 
 		}
+		void rotate(int i) {
 
+			(*m_replica)[i] += m_R;
+			if( (*m_replica)[i] >= 1.0 ) (*m_replica)[i] -= 1.0;
+			(*m_state)[i] -= m_R;
+			if( (*m_state)[i] < 0.0 ) (*m_state)[i] += 1.0;
+
+		}
 		void q_swap(int i, int j) {
 
-			double E_i = m_state->energy(i, j) + m_replica->energy(i, j);
+			double S_i = (*m_state)[j];
+			double U_i = (*m_replica)[j];
+
+			double E_i = m_state->energy(i, j) + m_replica->energy(i, j);		
+			rotate(j);
 			swap(j);
 			double E_f = m_state->energy(i, j) + m_replica->energy(i, j);;
 
@@ -73,7 +84,8 @@ class RECA {
 				propigate(j);
 			}
 			else {
-				swap(j);
+				(*m_state)[j] = S_i;
+				(*m_replica)[j] = U_i;
 			}
 		}
 
@@ -101,7 +113,8 @@ class RECA {
 		}
 		void evolve_state() {
 
-			m_state->shift_all();
+			m_R = rand0_1();
+			//m_state->shift_all();
 
 			int i = randN(m_L);
 			swap(i);

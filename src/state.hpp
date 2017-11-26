@@ -47,16 +47,6 @@ class State {
 
 		}
 
-		void shift_all() {
-
-			double r = rand0_1();
-			int n = m_v.size();
-
-			std::for_each(m_v.begin(), m_v.end(), [r](double &n){ n+=r;
-																														if(n>=1.0) n-=1.0;
-																													});
-		}
-
 		void randomize_all() {
 
 			std::generate( m_v.begin(), m_v.end(), rand0_1 );
@@ -79,10 +69,6 @@ class State {
 			m_history.push_back(m_v);
 			m_energy_history.push_back(total_energy());
 
-		}
-
-		double get_history(int t, int i) {
-			return m_history[t][i];
 		}
 
 		void print() {

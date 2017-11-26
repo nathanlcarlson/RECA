@@ -14,8 +14,7 @@ def main():
                         help='The width of the lattice to simulate')
     parser.add_argument('-n','--samples', dest='samples', type=int, default = 1,
                         help='Number of simulations to do for each unique parameter set')
-    parser.add_argument('-H','--host', dest='host', default = "localhost",
-                        help='The mongodb host')
+
     args = parser.parse_args()
 
     m_dict = {}
@@ -30,7 +29,6 @@ def main():
 
 
             m_dict[L][beta][freq]['process'].append(subprocess.Popen(["./reca",
-                                                                  args.host,
                                                                   L,
                                                                   beta,
                                                                   freq,
