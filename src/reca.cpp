@@ -8,7 +8,7 @@
 #include "couplings.hpp"
 #include "state.hpp"
 #include "algorithm.hpp"
-#include "dbwriter.hpp"
+#include "node.hpp"
 
 // Used as an ID
 #define A 'A'
@@ -24,7 +24,7 @@ double a_coupling_energy(node i, node j) {
 }
 
 // Define how to calculate energy between two nodes
-double energy(State* s, int i, int j) {
+double jja_energy(State* s, int i, int j) {
 
 	return -1*cos( 2 * M_PI * ( (*s)[i] - (*s)[j] - s->bonds(A)->get(i, j) ) );
 
@@ -41,26 +41,27 @@ int main(int argc, char **argv) {
 	seedRand( time(NULL) );
 	//
 	int w = atoi(argv[1]);
-	int n_nodes = w * w;
+	int n = w * w;
 	double beta = atof(argv[2]);
 	double freq = atof(argv[3])/100.0;
 	int t = 0;
   int t_stop = atoi(argv[4]);
 
 
-	auto bonds_A = std::make_shared<Bonds>(A, n_nodes, a_coupling_energy);
-
-	std::vector<std::shared_ptr<Bonds>> bonds{bonds_A};
-
-	auto my_state = std::make_shared<State>(n_nodes, beta, energy, bonds);
-
-	// Set up couplings
+	// XY+A model
+	//  Set-up bonds
+	auto bonds_A = std::make_shared<Bonds>(A, n, a_coupling_energy);
 	bonds_A->square2D(false);
-	//bonds_A->scale_all( 1.0/n );
+	std::vector<std::shared_ptr<Bonds>> bondsA{bonds_A};
+	//  Define node values
+	auto nodes_A = std::make_shared<Node>(1.0);
+	//  Define state
+	auto jja_state = std::make_shared<State>(n, beta, jja_energy, bondsA, nodes_A);
+
 
 	// Choices of algorithms
-	auto my_reca = std::make_unique<RECA>( my_state );
-	auto my_metro = std::make_unique<Metropolis>( my_state );
+	auto my_reca = std::make_unique<RECA>( jja_state );
+	auto my_metro = std::make_unique<Metropolis>( jja_state );
 	// Gather metrics
 	while (t < t_stop) {
 
@@ -79,7 +80,8 @@ int main(int argc, char **argv) {
 		t++;
 
 	}
-
+	// TODO Replace this system for saving data with a more modular solution
+	
 	// std::vector<double> mean_sub;
 	// double avg_energy = calc_avg_energy(my_state->energy_history(), t_stop);
 	// for(const auto &energy : my_state->energy_history()) {

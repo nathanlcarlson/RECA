@@ -6,6 +6,7 @@
 #include <map>
 #include <time.h>
 #include "utils.hpp"
+#include "node.hpp"
 
 
 class State {
@@ -18,8 +19,10 @@ class State {
 		double m_L;
 
 		EnergyFunction_Ptr m_energy;
+		// TODO Simplify bonds
 		std::vector <std::shared_ptr<Bonds>> m_bonds;
 		std::map <char, std::shared_ptr<Bonds>> m_bonds_map;
+		std::shared_ptr <Node> m_node;
 		std::vector <double> m_v;
 		std::vector <double> m_energy_history;
 		std::vector <std::vector <double>> m_history;
@@ -28,9 +31,13 @@ class State {
 
 		double B;
 
+		// TODO Simplify or create multiple constructors
 		template< typename TBonds >
-		State(int t_L, int t_B, EnergyFunction_Ptr t_f, TBonds t_bonds)
-			: B(t_B), m_energy(t_f), m_L(t_L), m_bonds(t_bonds)
+		State(int t_L, int t_B,
+			    EnergyFunction_Ptr t_f,
+					TBonds t_bonds,
+					std::shared_ptr<Node> t_node)
+			: B(t_B), m_energy(t_f), m_L(t_L), m_bonds(t_bonds), m_node(t_node)
 		{
 
 			for( const auto& b: t_bonds ) {
@@ -41,29 +48,50 @@ class State {
 
 		}
 
+		// Calculate energy between i and j
 		double energy(const int i, const int j) {
 
 			return m_energy(this, i, j);
 
 		}
 
-		void randomize_all() {
+		// Shift all with help of Node class
+		void shift_all() {
 
-			std::generate( m_v.begin(), m_v.end(), rand0_1 );
+			m_node->set_shift();
+			for(int i = 0; i < m_L; ++i) {
+				m_v[i] = m_node->shifted_value(m_v[i]);
+			}
 
 		}
 
+		// Randomizes the whole state with help of Node class
+		void randomize_all() {
+
+			for(int i = 0; i < m_L; ++i) {
+				m_v[i] = m_node->random_value();
+			}
+
+		}
+
+		// Randomizes one with help of Node class
 		int randomize_one(int i = -1) {
 
 			if(i == -1) {
 				i = randN(m_v.size());
 			}
 
-			m_v[i] = rand0_1();
+			m_v[i] = m_node->random_value();
 
 			return i;
 		}
 
+		// Get color with help of Node class
+		std::vector<double> getColor(int i) {
+			return m_node->getRGB(m_v[i]);
+		}
+
+		// TODO Replace this system for saving data with a more modular solution
 		void save() {
 
 			m_history.push_back(m_v);
@@ -87,18 +115,21 @@ class State {
 
 		}
 
+		// Get bonds by ID
 		std::shared_ptr<Bonds> bonds(char id) {
 
 			return m_bonds_map[id];
 
 		}
 
+		// Get first bond in list
 		std::shared_ptr<Bonds> bonds() {
 
 			return m_bonds[0];
 
 		}
 
+		// Calculate total energy
 		double total_energy() {
 
 			double E = 0;
@@ -117,12 +148,12 @@ class State {
 			return E;
 
 		}
-
+		// TODO Replace this system for saving data with a more modular solution
 		std::vector<std::vector<double>> history(){
 
 			return m_history;
 		}
-
+		// TODO Replace this system for saving data with a more modular solution
 		std::vector<double>& energy_history(){
 
 			return m_energy_history;
