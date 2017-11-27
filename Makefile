@@ -9,17 +9,17 @@ HPP := $(wildcard src/*.hpp)
 detected_OS := $(shell uname -s)
 ifeq ($(detected_OS),Darwin)  # Mac OS X
     CXXFLAGS += -D OSX
-		GLIBS := $(LIBS) -lglfw3 -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
+		GLIBS := $(LIBS)  -lglfw3 -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo -Wl,-rpath,/usr/local/lib/
 endif
 ifeq ($(detected_OS),Linux)
     CXXFLAGS += -D LINUX
-	  GLIBS += $(LIBS) -lGL -lglfw
+	  GLIBS += $(LIBS) -lGL -lglfw -Wl,-rpath=/usr/local/lib/
 endif
 
 graphics: $(OBJS) obj/graphics.o
 	$(CXX) $(INCLUDES) -o $@ $^ $(GLIBS)
 reca: $(OBJS) obj/reca.o
-	$(CXX) $(INCLUDES) -o $@ $^ $(LIBS) -Wl,-rpath=/usr/local/lib/
+	$(CXX) $(INCLUDES) -o $@ $^ $(LIBS)
 obj/%.o: src/%.cpp $(HPP) | $(OBJDIR)
 	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $< -Wl,-rpath=/usr/local/lib/
 $(OBJDIR):
