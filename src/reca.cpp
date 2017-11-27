@@ -33,7 +33,7 @@ double jja_energy(State* s, int i, int j) {
 int main(int argc, char **argv) {
 
 
-  if (argc != 6) {
+  if (argc != 5) {
     std::cout << "\treca [width] [beta] [percent RECA] [MC steps]\n";
     return 1;
   }
@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
 
 	}
 	// TODO Replace this system for saving data with a more modular solution
-	
+
 	// std::vector<double> mean_sub;
 	// double avg_energy = calc_avg_energy(my_state->energy_history(), t_stop);
 	// for(const auto &energy : my_state->energy_history()) {
