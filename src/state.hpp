@@ -31,7 +31,7 @@ class State {
 
 		double B;
 
-		// TODO Simplify or create multiple constructors
+		// TODO Simplify or create multiple  ructors
 		template< typename TBonds >
 		State(int t_L, int t_B,
 			    EnergyFunction_Ptr t_f,
@@ -40,7 +40,7 @@ class State {
 			: B(t_B), m_energy(t_f), m_L(t_L), m_bonds(t_bonds), m_node(t_node)
 		{
 
-			for( const auto& b: t_bonds ) {
+			for(   auto& b: t_bonds ) {
 				m_bonds_map[b->id] = b;
 			}
 			m_v.resize(t_L);
@@ -49,7 +49,7 @@ class State {
 		}
 
 		// Calculate energy between i and j
-		double energy(const int i, const int j) {
+		double energy(  int i,   int j) {
 
 			return m_energy(this, i, j);
 
@@ -102,7 +102,7 @@ class State {
 		void print() {
 
 			std::cout << "State contains:";
-			for (const auto& site: m_v) {
+			for ( auto& site: m_v) {
 				std::cout << ' ' << site;
 			}
 			std::cout << '\n';
