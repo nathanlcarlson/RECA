@@ -51,17 +51,11 @@ void display_state(std::shared_ptr<State> state, int n, double w) {
 
 			glBegin(GL_TRIANGLES);
 			// Get color
-			// glColor3f(hueToRGB((*state)[c] + 0.3333),
-			//           hueToRGB((*state)[c]),
-			//           hueToRGB((*state)[c] - 0.3333));
 			auto color = state->getColor(c);
-			// std::cout << "R: " << color[0] << '\n';
-			// std::cout << "G: " << color[1]<< '\n';
-			// std::cout << "B: " << color[2]<< '\n';
 
 			glColor3f(color[0],
-								color[1],
-								color[2]);
+					      color[1],
+					      color[2]);
 			c++;
 			// Make Square
 
@@ -128,9 +122,10 @@ int main(int argc, char **argv) {
 
 
 	// Choices of algorithms
-	auto my_reca = std::make_unique<RECA>( ising_state );
-	auto my_metro = std::make_unique<Metropolis>( ising_state );
+	auto my_reca = std::make_unique<RECA>( jja_state );
+	auto my_metro = std::make_unique<Metropolis>( jja_state );
 
+	// Begin graphics setup
 	GLFWwindow *window;
 
 	// Initialize the library
@@ -172,12 +167,12 @@ int main(int argc, char **argv) {
 		n_steps++;
 		if (count == 0) {
 
-			display_state(ising_state, w, 0.9/w);
+			display_state(jja_state, w, 0.9/w);
 			glfwSwapBuffers(window);
 			count = interval;
-			// std::cout << n_steps << '\n';
-			// std::cout << "Press enter to continue\n";
-      // getchar();
+			std::cout << n_steps << '\n';
+			std::cout << "Press enter to continue\n";
+      getchar();
 		}
 		// Poll for and process events
 		glfwPollEvents();
