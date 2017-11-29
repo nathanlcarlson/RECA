@@ -34,7 +34,7 @@ int mod( int a, int b ) {
   return c;
 
 }
-std::vector<double>& autocorrelation(std::vector<double> _s) {
+std::vector<double>& autocorrelation(std::vector<double>& _s) {
 
   int N = _s.size();
   int fftN = 2*N;
@@ -54,9 +54,6 @@ std::vector<double>& autocorrelation(std::vector<double> _s) {
     in[i][1] = 0;
   }
 
-
-  /* forward Fourier transform, save the result in 'out' */
-
   fftw_execute(p);
 
   for (i = 0; i < fftN; i++) {
@@ -67,7 +64,7 @@ std::vector<double>& autocorrelation(std::vector<double> _s) {
   }
 
   fftw_execute(q);
-  /* normalize */
+
   for (i = 0; i < N; i++) {
     _s[i] = res[i][0]/fftN;
   }

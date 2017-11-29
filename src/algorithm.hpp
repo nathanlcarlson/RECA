@@ -4,37 +4,46 @@
 #include <limits>
 #include "state.hpp"
 
+// Store info for cluster growth
 class Cluster {
 
 	private:
-
+		// Holds cluster ids
 		std::vector< unsigned int > m_cluster;
+		// Current active cluster id
 		unsigned int m_current;
 
 	public:
 
 		Cluster(int t_N) {
-
+			// Initialize current ID to MAX UNSIGNED INT - 1
 			m_current = std::numeric_limits<unsigned int>::max() - 1;
+
+			// Resize to total number of nodes
 			m_cluster.resize(t_N);
 
 		}
 
 		bool contains(int i) {
 
+			// Check if node is in cluster by checking against the current ID
 			return m_cluster[i] == m_current;
 
 		}
 
 		void add(int i) {
 
+			// Add node to cluster by setting equal to the current cluster ID
 			m_cluster[i] = m_current;
 
 		}
 		void clear() {
 
+			// Decrement current, "removing" all nodes from cluster
 			m_current -= 1;
 
+			// Once current ID equals 1, reset it and fill with 0
+			// Occurs after about 2^32 iterations
 			if(m_current == 1) {
 				m_current = std::numeric_limits<unsigned int>::max() - 1;
 				std::fill(m_cluster.begin(), m_cluster.end(), 0);
@@ -52,6 +61,7 @@ class RECA {
 		std::unique_ptr<State> m_replica;
 		std::unique_ptr<Cluster> m_cluster;
 
+		// Swap site between replica and primary
 		void swap(int j) {
 
 			double tmp = (*m_replica)[j];
@@ -68,6 +78,8 @@ class RECA {
 		// 	if( (*m_state)[i] < 0.0 ) (*m_state)[i] += 1.0;
 		//
 		// }
+
+		// Check energy change and add to cluster, or not
 		void q_swap(int i, int j) {
 
 			//double S_i = (*m_state)[j];
@@ -82,6 +94,7 @@ class RECA {
 
 			if ( rand0_1() < P ) {
 				m_cluster->add(j);
+				// Propigate from this new site
 				propigate(j);
 			}
 			else {
@@ -89,6 +102,7 @@ class RECA {
 			}
 		}
 
+		// Recursively called to grow cluster
 		void propigate(int i) {
 
 			for (auto neighbor = m_state->bonds()->begin(i); neighbor != m_state->bonds()->end(i); ++neighbor) {
