@@ -122,8 +122,8 @@ int main(int argc, char **argv) {
 
 
 	// Choices of algorithms
-	auto my_reca = std::make_unique<RECA>( jja_state );
-	auto my_metro = std::make_unique<Metropolis>( jja_state );
+	auto my_reca = std::make_unique<RECA>( ising_state );
+	auto my_metro = std::make_unique<Metropolis>( ising_state );
 
 	// Begin graphics setup
 	GLFWwindow *window;
@@ -167,8 +167,10 @@ int main(int argc, char **argv) {
 		n_steps++;
 		if (count == 0) {
 
-			display_state(jja_state, w, 0.9/w);
+			display_state(ising_state, w, 0.9/w);
 			glfwSwapBuffers(window);
+			// Poll for and process events
+			glfwPollEvents();
 			count = interval;
 			std::cout << n_steps << '\n';
 			std::cout << "Press enter to continue\n";

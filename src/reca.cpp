@@ -33,13 +33,18 @@ double jja_energy(State* s, int i, int j) {
 int main(int argc, char **argv) {
 
 
-  if (argc != 5) {
-    std::cout << "\treca [width] [beta] [percent RECA] [MC steps]\n";
+  if (argc != 6) {
+    std::cout << "\treca [width] [beta] [percent RECA] [MC steps] [Filebase]\n";
     return 1;
   }
 
 	seedRand( time(NULL) );
-	//
+	// Parameters and outfile
+	std::string file_base(argv[5]);
+	std::string enr_file = file_base+".enr";
+	std::ofstream oenr_file;
+	oenr_file.open(enr_file);
+
 	int w = atoi(argv[1]);
 	int n = w * w;
 	double beta = atof(argv[2]);
@@ -62,12 +67,14 @@ int main(int argc, char **argv) {
 	// Choices of algorithms
 	auto my_reca = std::make_unique<RECA>( jja_state );
 	auto my_metro = std::make_unique<Metropolis>( jja_state );
+
+
 	// Gather metrics
 	while (t < t_stop) {
 
 		// Save current t step in states history
 		//my_state->save();
-
+		oenr_file << jja_state->total_energy() << '\n';
 		// Evovle mixed
 		if(rand0_1() < freq){
 			my_reca->evolve_state();
@@ -80,6 +87,7 @@ int main(int argc, char **argv) {
 		t++;
 
 	}
+	oenr_file.close();
 	// TODO Replace this system for saving data with a more modular solution
 
 	// std::vector<double> mean_sub;

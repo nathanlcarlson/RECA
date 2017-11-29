@@ -14,7 +14,8 @@ def main():
                         help='The width of the lattice to simulate')
     parser.add_argument('-n','--samples', dest='samples', type=int, default = 1,
                         help='Number of simulations to do for each unique parameter set')
-
+    parser.add_argument('-r','--root', dest='root', default = "data",
+                        help='The root directory to store data in')
     args = parser.parse_args()
 
     m_dict = {}
@@ -27,12 +28,15 @@ def main():
           m_dict[L][beta][freq]['process'] = []
           for c in range(args.samples):
 
+            mkdirs(args.root+"/L"+L+"/Beta"+beta+"/Freq"+freq)
+            path = args.root+"/L"+L+"/Beta"+beta+"/Freq"+freq+"/"+str(c)
 
             m_dict[L][beta][freq]['process'].append(subprocess.Popen(["./reca",
                                                                   L,
                                                                   beta,
                                                                   freq,
-                                                                  args.steps
+                                                                  args.steps,
+                                                                  path
                                                                  ],
                                                                   stdout=subprocess.PIPE,
                                                                   stderr=subprocess.STDOUT))
