@@ -1,3 +1,7 @@
 *.o
 test
 main
+src/*~
+*~
+proc/*~
+obj/*

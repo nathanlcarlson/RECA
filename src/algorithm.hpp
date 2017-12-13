@@ -4,37 +4,46 @@
 #include <limits>
 #include "state.hpp"
 
+// Store info for cluster growth
 class Cluster {
 
 	private:
-
+		// Holds cluster ids
 		std::vector< unsigned int > m_cluster;
+		// Current active cluster id
 		unsigned int m_current;
 
 	public:
 
 		Cluster(int t_N) {
-
+			// Initialize current ID to MAX UNSIGNED INT - 1
 			m_current = std::numeric_limits<unsigned int>::max() - 1;
+
+			// Resize to total number of nodes
 			m_cluster.resize(t_N);
 
 		}
 
 		bool contains(int i) {
 
+			// Check if node is in cluster by checking against the current ID
 			return m_cluster[i] == m_current;
 
 		}
 
 		void add(int i) {
 
+			// Add node to cluster by setting equal to the current cluster ID
 			m_cluster[i] = m_current;
 
 		}
 		void clear() {
 
+			// Decrement current, "removing" all nodes from cluster
 			m_current -= 1;
 
+			// Once current ID equals 1, reset it and fill with 0
+			// Occurs after about 2^32 iterations
 			if(m_current == 1) {
 				m_current = std::numeric_limits<unsigned int>::max() - 1;
 				std::fill(m_cluster.begin(), m_cluster.end(), 0);
@@ -45,13 +54,14 @@ class Cluster {
 class RECA {
 
 	private:
-
+		double m_R;
 		int m_L;
 
-		State *m_state;
-		State *m_replica;
-		Cluster *m_cluster;
+		std::shared_ptr<State> m_state;
+		std::unique_ptr<State> m_replica;
+		std::unique_ptr<Cluster> m_cluster;
 
+		// Swap site between replica and primary
 		void swap(int j) {
 
 			double tmp = (*m_replica)[j];
@@ -59,16 +69,32 @@ class RECA {
 			(*m_state)[j] = tmp;
 
 		}
+		// TODO Implement this optimization
+		// void rotate(int i) {
+		//
+		// 	(*m_replica)[i] += m_R;
+		// 	if( (*m_replica)[i] >= 1.0 ) (*m_replica)[i] -= 1.0;
+		// 	(*m_state)[i] -= m_R;
+		// 	if( (*m_state)[i] < 0.0 ) (*m_state)[i] += 1.0;
+		//
+		// }
 
+		// Check energy change and add to cluster, or not
 		void q_swap(int i, int j) {
 
-			double E_i = m_state->energy(i, j);
+			//double S_i = (*m_state)[j];
+			//double U_i = (*m_replica)[j];
+
+			double E_i = m_state->energy(i, j) + m_replica->energy(i, j);
+			//rotate(j);
 			swap(j);
-			double E_f = m_state->energy(i, j);
+			double E_f = m_state->energy(i, j) + m_replica->energy(i, j);;
 
 			double P = 1 - exp((m_state->B) * (E_f - E_i));
 
 			if ( rand0_1() < P ) {
+				m_cluster->add(j);
+				// Propigate from this new site
 				propigate(j);
 			}
 			else {
@@ -76,6 +102,7 @@ class RECA {
 			}
 		}
 
+		// Recursively called to grow cluster
 		void propigate(int i) {
 
 			for (auto neighbor = m_state->bonds()->begin(i); neighbor != m_state->bonds()->end(i); ++neighbor) {
@@ -84,7 +111,6 @@ class RECA {
 
 				if (!(m_cluster->contains(j))) {
 
-					m_cluster->add(j);
 					q_swap(i, j);
 
 				}
@@ -92,18 +118,17 @@ class RECA {
 		}
 
 	public:
-		RECA(State *t_state)
+		RECA(std::shared_ptr<State> t_state)
+			: m_state(t_state)
 		{
-
-			m_state = t_state;
 			m_L = m_state->size();
-			m_replica = new State( *m_state );
-			m_cluster = new Cluster( m_L );
-
+			m_replica = std::make_unique<State>( *m_state );
+			m_cluster = std::make_unique<Cluster>( m_L );
 		}
 		void evolve_state() {
 
-			m_state->shift_all();
+			//m_R = rand0_1();
+			m_replica->shift_all();
 
 			int i = randN(m_L);
 			swap(i);
@@ -124,7 +149,7 @@ class RECA {
 
 					if( i < *neighbor) {
 
-						E += m_state->energy(i, *neighbor) + m_replica->energy(i, *neighbor);
+						E += m_state->energy(i, *neighbor);// + m_replica->energy(i, *neighbor);
 					}
 				}
 			}
@@ -139,13 +164,13 @@ class Metropolis {
 	private:
 
 		int m_L;
-		State *m_state;
+		std::shared_ptr<State> m_state;
 
 	public:
 
-		Metropolis(State *t_state)
+		Metropolis(std::shared_ptr<State> t_state)
+			: m_state(t_state)
 		{
-			m_state = t_state;
 			m_L = m_state->size();
 		}
 
