@@ -1,0 +1,14 @@
+samples: 1
+beta:
+  - 1
+  - 2
+  - 3
+width:
+  - 10
+percent_RECA:
+  - 0
+  - 5
+  - 95
+  - 100
+root: data
+steps : 32768
