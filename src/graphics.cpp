@@ -40,14 +40,26 @@ double ising_energy(State* t, int i, int j) {
 	return -1 * (*t)[i] * (*t)[j];
 }
 // Makes graphic
-void display_state(std::shared_ptr<State> state, int n, double w) {
+void display_state(std::shared_ptr<State> state, int n, int n_states, int pos) {
 
-	glClear(GL_COLOR_BUFFER_BIT);
 	int c = 0;
-
-	for (int i = -n / 2; i < n / 2; i++) {
-
-		for (int j = -n / 2; j < n / 2; j++) {
+	double dmax = sqrt(n_states);
+	int max = ceil(dmax);
+	//std::cout << max/2 <<'\n';
+	int posx;
+	int posy;
+	int f = (n + 4);
+	if( max%2 == 0){
+		posx = (int)f*(( (pos - 1) % max) - max/2 + 0.5);
+		posy = (int)f*(( (pos - 1)/ max) - max/2 + 0.5);
+	}
+	else{
+		posx = ( pos % max) - max/2;
+		posy = ( (pos - 1)/ max) - max/2;
+	}
+	double w = 0.8/(n * max);
+	for (int i = -n / 2 + posx; i < n / 2 + posx; i++) {
+		for (int j = -n / 2 + posy ; j < n / 2 + posy; j++) {
 
 			glBegin(GL_TRIANGLES);
 			// Get color
@@ -58,13 +70,17 @@ void display_state(std::shared_ptr<State> state, int n, double w) {
 					      color[2]);
 			c++;
 			// Make Square
+			double x1 = 2 * w * (i ) ;
+			double x2 = 2 * w * (i + 1 ) ;
+			double y1 = 2 * w * j ;
+			double y2 = 2 * w * (j + 1) ;
+			glVertex3f(x1, y1, 0.0);
+			glVertex3f(x1, y2, 0.0);
+			glVertex3f(x2, y1, 0.0);
 
-			glVertex3f((1 + 2 * i) * w - w, (1 + 2 * j) * w - w, 0.0);
-			glVertex3f((1 + 2 * i) * w - w, (1 + 2 * j) * w + w, 0.0);
-			glVertex3f((1 + 2 * i) * w + w, (1 + 2 * j) * w - w, 0.0);
-			glVertex3f((1 + 2 * i) * w - w, (1 + 2 * j) * w + w, 0.0);
-			glVertex3f((1 + 2 * i) * w + w, (1 + 2 * j) * w - w, 0.0);
-			glVertex3f((1 + 2 * i) * w + w, (1 + 2 * j) * w + w, 0.0);
+			glVertex3f(x1, y2, 0.0);
+			glVertex3f(x2, y1, 0.0);
+			glVertex3f(x2, y2, 0.0);
 			glEnd();
 
 		}
@@ -136,7 +152,7 @@ int main(int argc, char **argv) {
 	}
 
 	// Create a windowed mode window and its OpenGL context
-	window = glfwCreateWindow(640, 640, "State", NULL, NULL);
+	window = glfwCreateWindow(1000, 1000, "State", NULL, NULL);
 
 	if (!window) {
 
@@ -166,8 +182,11 @@ int main(int argc, char **argv) {
 		count--;
 		n_steps++;
 		if (count == 0) {
-
-			display_state(ising_state, w, 0.9/w);
+			glClear(GL_COLOR_BUFFER_BIT);
+			display_state(ising_state, w, 15, 16);
+			for(int i = 0; i < 15; i++){
+				display_state(my_reca->get_replica(i), w, 15, i+1);
+			}
 			glfwSwapBuffers(window);
 			// Poll for and process events
 			glfwPollEvents();
