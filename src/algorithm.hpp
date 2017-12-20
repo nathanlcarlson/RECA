@@ -56,89 +56,123 @@ class RECA {
 	private:
 		double m_R;
 		int m_L;
+		int m_k = 15;
 
 		std::shared_ptr<State> m_state;
-		std::unique_ptr<State> m_replica;
+		std::vector<std::shared_ptr<State>> m_replica;
 		std::unique_ptr<Cluster> m_cluster;
 
-		// Swap site between replica and primary
-		void swap(int j) {
-
-			double tmp = (*m_replica)[j];
-			(*m_replica)[j] = (*m_state)[j];
-			(*m_state)[j] = tmp;
-
-		}
 		// TODO Implement this optimization
-		// void rotate(int i) {
-		//
-		// 	(*m_replica)[i] += m_R;
-		// 	if( (*m_replica)[i] >= 1.0 ) (*m_replica)[i] -= 1.0;
-		// 	(*m_state)[i] -= m_R;
-		// 	if( (*m_state)[i] < 0.0 ) (*m_state)[i] += 1.0;
-		//
-		// }
+		void crotate_and_exchange(int i, std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
+		
+			S_i->shift_one(i, -1*m_R);
+			S_j->shift_one(i, m_R);
+
+			double tmp = (*S_j)[i];
+			(*S_j)[i] = (*S_i)[i];
+			(*S_i)[i] = tmp;
+		
+		}
 
 		// Check energy change and add to cluster, or not
-		void q_swap(int i, int j) {
+		void q_swap(int i, int j, std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
 
-			//double S_i = (*m_state)[j];
-			//double U_i = (*m_replica)[j];
+			double U_i = (*S_i)[j];
+			double R_i = (*S_j)[j];
 
-			double E_i = m_state->energy(i, j) + m_replica->energy(i, j);
-			//rotate(j);
-			swap(j);
-			double E_f = m_state->energy(i, j) + m_replica->energy(i, j);;
+			double E_i = S_i->energy(i, j) + S_j->energy(i, j);
+			crotate_and_exchange(j, S_i, S_j);
+			double E_f = S_i->energy(i, j) + S_j->energy(i, j);;
 
 			double P = 1 - exp((m_state->B) * (E_f - E_i));
 
 			if ( rand0_1() < P ) {
 				m_cluster->add(j);
 				// Propigate from this new site
-				propigate(j);
+				propigate(j, S_i, S_j);
 			}
 			else {
-				swap(j);
+				// Reset values to initial
+				(*S_i)[j] = U_i;
+				(*S_j)[j] = R_i;
 			}
 		}
 
 		// Recursively called to grow cluster
-		void propigate(int i) {
+		void propigate(int i, std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
 
-			for (auto neighbor = m_state->bonds()->begin(i); neighbor != m_state->bonds()->end(i); ++neighbor) {
+			for (auto neighbor = S_i->bonds()->begin(i); neighbor != S_i->bonds()->end(i); ++neighbor) {
 
 				int j = *neighbor;
 
 				if (!(m_cluster->contains(j))) {
 
-					q_swap(i, j);
+					q_swap(i, j, S_i, S_j);
 
 				}
 			}
 		}
 
 	public:
-		RECA(std::shared_ptr<State> t_state)
-			: m_state(t_state)
+		RECA(std::shared_ptr<State> t_state, int t_replicas)
+			: m_state(t_state), m_k(t_replicas)
 		{
 			m_L = m_state->size();
-			m_replica = std::make_unique<State>( *m_state );
+			for(int i = 0; i < m_k; ++i){
+				m_replica.push_back(std::make_shared<State>( *m_state ));
+				m_replica[i]->randomize_all();
+			}
 			m_cluster = std::make_unique<Cluster>( m_L );
 		}
 		void evolve_state() {
 
-			//m_R = rand0_1();
-			m_replica->shift_all();
+			std::vector<int> replica_ids;
+			for(int i = 0; i < m_k; ++i){
+				replica_ids.push_back(i);
+			}
 
+			// Make random pairs between replicas
+			while(replica_ids.size() != 1){
+				// Set rotation
+				m_R = m_state->get_shift();
+				
+				int m = replica_ids[randN(replica_ids.size())];
+
+				auto it = std::find(replica_ids.begin(), replica_ids.end(), m);
+				if(it != replica_ids.end())
+				    replica_ids.erase(it);
+
+				int n = replica_ids[randN(replica_ids.size())];
+
+				it = std::find(replica_ids.begin(), replica_ids.end(), n);
+				if(it != replica_ids.end())
+				    replica_ids.erase(it);
+
+				int i = randN(m_L);
+				crotate_and_exchange(i, m_replica[m], m_replica[n]);
+				m_cluster->add(i);
+
+				propigate(i, m_replica[m], m_replica[n]);
+				m_cluster->clear();
+
+			}
+
+			// Set rotation
+			m_R = m_state->get_shift();
+			
+			// Seed site
 			int i = randN(m_L);
-			swap(i);
-	    m_cluster->add(i);
-			propigate(i);
+			crotate_and_exchange(i, m_replica[replica_ids[0]], m_state);
+			m_cluster->add(i);
 
+			// Propigate from seed site, building the cluster
+			propigate(i, m_replica[replica_ids[0]], m_state);
 			m_cluster->clear();
 
 		}
-
+		std::shared_ptr<State> get_replica(int i){
+			return m_replica[i];
+		}
 		double total_energy() {
 
 			double E = 0;
