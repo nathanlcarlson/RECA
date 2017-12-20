@@ -101,8 +101,8 @@ int main(int argc, char **argv) {
 
 	// The needed parameters
 	// TODO	Get parameters from file?
-	if (argc != 5) {
-    std::cout << "\tgraphics [width] [beta] [percent RECA] [display interval]\n";
+	if (argc != 6) {
+    std::cout << "\tgraphics [width] [beta] [percent RECA] [display interval] [state_type]\n";
     return 1;
   }
 
@@ -136,10 +136,18 @@ int main(int argc, char **argv) {
 	//  Define state
 	auto ising_state = std::make_shared<State>(n, beta, ising_energy, bondsJ, nodes_J);
 
+	auto my_state = std::make_shared<State>( *jja_state );
+	std::string state(argv[5]);
+	if ( state == "ising") {
+		my_state = ising_state;
+	}
+
+	// N Replicas to use
+	int n_replicas = 1;
 
 	// Choices of algorithms
-	auto my_reca = std::make_unique<RECA>( ising_state );
-	auto my_metro = std::make_unique<Metropolis>( ising_state );
+	auto my_reca = std::make_unique<RECA>( my_state, n_replicas );
+	auto my_metro = std::make_unique<Metropolis>( my_state );
 
 	// Begin graphics setup
 	GLFWwindow *window;
@@ -183,9 +191,9 @@ int main(int argc, char **argv) {
 		n_steps++;
 		if (count == 0) {
 			glClear(GL_COLOR_BUFFER_BIT);
-			display_state(ising_state, w, 15, 16);
-			for(int i = 0; i < 15; i++){
-				display_state(my_reca->get_replica(i), w, 15, i+1);
+			display_state(my_state, w, n_replicas+1, n_replicas+1);
+			for(int i = 0; i < n_replicas; i++){
+				display_state(my_reca->get_replica(i), w, n_replicas+1, i+1);
 			}
 			glfwSwapBuffers(window);
 			// Poll for and process events

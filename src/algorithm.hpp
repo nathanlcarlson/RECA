@@ -120,8 +120,8 @@ class RECA {
 		}
 
 	public:
-		RECA(std::shared_ptr<State> t_state)
-			: m_state(t_state)
+		RECA(std::shared_ptr<State> t_state, int t_replicas)
+			: m_state(t_state), m_k(t_replicas)
 		{
 			m_L = m_state->size();
 			for(int i = 0; i < m_k; ++i){
@@ -160,7 +160,7 @@ class RECA {
 				m_cluster->clear();
 
 			}
-			m_replica[0]->shift_all();
+			m_replica[replica_ids[0]]->shift_all();
 			int i = randN(m_L);
 			swap(i, m_replica[0], m_state);
 			m_cluster->add(i);
