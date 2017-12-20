@@ -58,38 +58,30 @@ class RECA {
 		int m_L;
 		int m_k = 15;
 
-
 		std::shared_ptr<State> m_state;
 		std::vector<std::shared_ptr<State>> m_replica;
 		std::unique_ptr<Cluster> m_cluster;
 
-		// Swap site between replica and primary
-		void swap(int j, std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
-
-			double tmp = (*S_j)[j];
-			(*S_j)[j] = (*S_i)[j];
-			(*S_i)[j] = tmp;
-
-		}
 		// TODO Implement this optimization
-		// void rotate(int i) {
-		//
-		// 	(*m_replica)[i] += m_R;
-		// 	if( (*m_replica)[i] >= 1.0 ) (*m_replica)[i] -= 1.0;
-		// 	(*m_state)[i] -= m_R;
-		// 	if( (*m_state)[i] < 0.0 ) (*m_state)[i] += 1.0;
-		//
-		// }
+		void crotate_and_exchange(int i, std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
+		
+			S_i->shift_one(i, -1*m_R);
+			S_j->shift_one(i, m_R);
+
+			double tmp = (*S_j)[i];
+			(*S_j)[i] = (*S_i)[i];
+			(*S_i)[i] = tmp;
+		
+		}
 
 		// Check energy change and add to cluster, or not
 		void q_swap(int i, int j, std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
 
-			//double S_i = (*m_state)[j];
-			//double U_i = (*m_replica)[j];
+			double U_i = (*S_i)[j];
+			double R_i = (*S_j)[j];
 
 			double E_i = S_i->energy(i, j) + S_j->energy(i, j);
-			//rotate(j);
-			swap(j, S_i, S_j);
+			crotate_and_exchange(j, S_i, S_j);
 			double E_f = S_i->energy(i, j) + S_j->energy(i, j);;
 
 			double P = 1 - exp((m_state->B) * (E_f - E_i));
@@ -100,7 +92,9 @@ class RECA {
 				propigate(j, S_i, S_j);
 			}
 			else {
-				swap(j, S_i, S_j);
+				// Reset values to initial
+				(*S_i)[j] = U_i;
+				(*S_j)[j] = R_i;
 			}
 		}
 
@@ -132,13 +126,16 @@ class RECA {
 		}
 		void evolve_state() {
 
-			//m_R = rand0_1();
 			std::vector<int> replica_ids;
 			for(int i = 0; i < m_k; ++i){
 				replica_ids.push_back(i);
 			}
 
+			// Make random pairs between replicas
 			while(replica_ids.size() != 1){
+				// Set rotation
+				m_R = m_state->get_shift();
+				
 				int m = replica_ids[randN(replica_ids.size())];
 
 				auto it = std::find(replica_ids.begin(), replica_ids.end(), m);
@@ -151,21 +148,25 @@ class RECA {
 				if(it != replica_ids.end())
 				    replica_ids.erase(it);
 
-				m_replica[n]->shift_all();
 				int i = randN(m_L);
-				swap(i, m_replica[m], m_replica[n]);
+				crotate_and_exchange(i, m_replica[m], m_replica[n]);
 				m_cluster->add(i);
 
 				propigate(i, m_replica[m], m_replica[n]);
 				m_cluster->clear();
 
 			}
-			m_replica[replica_ids[0]]->shift_all();
+
+			// Set rotation
+			m_R = m_state->get_shift();
+			
+			// Seed site
 			int i = randN(m_L);
-			swap(i, m_replica[0], m_state);
+			crotate_and_exchange(i, m_replica[replica_ids[0]], m_state);
 			m_cluster->add(i);
 
-			propigate(i, m_replica[0], m_state);
+			// Propigate from seed site, building the cluster
+			propigate(i, m_replica[replica_ids[0]], m_state);
 			m_cluster->clear();
 
 		}

@@ -101,8 +101,8 @@ int main(int argc, char **argv) {
 
 	// The needed parameters
 	// TODO	Get parameters from file?
-	if (argc != 6) {
-    std::cout << "\tgraphics [width] [beta] [percent RECA] [display interval] [state_type]\n";
+	if (argc != 7) {
+    std::cout << "\tgraphics [width] [beta] [percent RECA] [display interval] [state_type] [n repilcas]\n";
     return 1;
   }
 
@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
 	}
 
 	// N Replicas to use
-	int n_replicas = 1;
+	int n_replicas = atoi(argv[6]);
 
 	// Choices of algorithms
 	auto my_reca = std::make_unique<RECA>( my_state, n_replicas );

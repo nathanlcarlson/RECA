@@ -62,29 +62,36 @@ class Node {
     }
 
     // Shift a value
-    double shifted_value(double _cur){
+    double shifted_value(double _cur, double _shift = 0){
+      if (_shift == 0){
+        _shift = m_shift;
+      }
       if(m_continuous){
-        double v = _cur + m_shift;
+        double v = _cur + _shift;
         if(v > m_Max){
           v -= (m_Max - m_Min);
+        }
+        if(v < m_Min){
+          v += (m_Max - m_Min);
         }
         return v;
       }
       else{
         int i = std::find(m_values.begin(), m_values.end(), _cur) - m_values.begin();
 
-        return m_values[(i + (int)m_shift)%m_N];
+        return m_values[mod(i + (int)_shift, m_N)];
       }
     }
 
     // Sets the value of the next shift
-    void set_shift() {
+    double set_shift() {
       if(m_continuous){
         m_shift = rand0_1()*(m_Max - m_Min);
       }
       else{
         m_shift = 1 + randN(m_N - 1);
       }
+      return m_shift;
     }
 
     // TODO Make cyclic and not cyclic versions of this

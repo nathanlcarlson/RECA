@@ -65,6 +65,18 @@ class State {
 
 		}
 
+		// Shift one site with help of Node class
+		void shift_one(int i, double _s) {
+
+			m_v[i] = m_node->shifted_value(m_v[i], _s);
+
+		}
+
+		double get_shift() {
+
+			return m_node->set_shift();		
+		}
+
 		// Randomizes the whole state with help of Node class
 		void randomize_all() {
 
