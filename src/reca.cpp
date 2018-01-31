@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 
 
 	// Choices of algorithms
-	auto my_reca = std::make_unique<RECA>( jja_state );
+	auto my_reca = std::make_unique<RECA>( jja_state, 1 );
 	auto my_metro = std::make_unique<Metropolis>( jja_state );
 
 

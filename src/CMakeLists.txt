@@ -1,11 +1,11 @@
 add_library(MyLib algorithm.hpp state.hpp utils.cpp couplings.cpp node.hpp)
-#add_library(State state.hpp)
-#add_library(Utils utils.cpp)
-#add_library(Couplings couplings.cpp)
-#add_library(Node node.hpp)
 
 target_include_directories (MyLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories (MyLib PUBLIC "/usr/local/include")
-add_executable(RECA reca.cpp)
+
+find_library (FFTW fftw3)
+target_link_libraries (MyLib "${FFTW}")
+add_executable (RECA reca.cpp)
 target_link_libraries(RECA MyLib)
-#target_include_directories ()
+
+install(TARGETS RECA RUNTIME DESTINATION "${CMAKE_SOURCE_DIR}")
