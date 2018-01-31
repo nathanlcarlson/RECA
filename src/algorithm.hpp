@@ -57,6 +57,7 @@ class RECA {
 		double m_R;
 		int m_L;
 		int m_k = 15;
+    int m_step = 0;
 
 		std::shared_ptr<State> m_state;
 		std::vector<std::shared_ptr<State>> m_replica;
@@ -82,7 +83,8 @@ class RECA {
 
 			double E_i = S_i->energy(i, j) + S_j->energy(i, j);
 			crotate_and_exchange(j, S_i, S_j);
-			double E_f = S_i->energy(i, j) + S_j->energy(i, j);;
+			double E_f = S_i->energy(i, j) + S_j->energy(i, j);
+			m_step += 5;
 
 			double P = 1 - exp((m_state->B) * (E_f - E_i));
 
@@ -191,6 +193,9 @@ class RECA {
 			return E;
 
 		}
+		int step() {
+		  return m_step;
+		}
 };
 
 class Metropolis {
@@ -198,6 +203,7 @@ class Metropolis {
 	private:
 
 		int m_L;
+		int m_step = 0;
 		std::shared_ptr<State> m_state;
 
 	public:
@@ -221,6 +227,7 @@ class Metropolis {
 
 				int j = *neighbor;
 				E_i += m_state->energy(i, j);
+				m_step++;
 
 			}
 
@@ -232,11 +239,13 @@ class Metropolis {
 
 				int j = *neighbor;
 				E_f += m_state->energy(i, j);
+				m_step++;
 
 			}
 
 			// Accept change?
 			double P = exp((m_state->B) * (E_i - E_f));
+			m_step++;
 
 			if (P < 1 && rand0_1() < (1.0 - P) ) {
 
@@ -244,6 +253,9 @@ class Metropolis {
 				(*m_state)[i] = initial;
 
 			}
+		}
+		int step() {
+		  return m_step;
 		}
 
 };

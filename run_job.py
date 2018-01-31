@@ -29,7 +29,7 @@ def main():
             mkdirs(yargs['root']+"/L"+L+"/Beta"+beta+"/Freq"+freq)
             path = yargs['root']+"/L"+L+"/Beta"+beta+"/Freq"+freq+"/"+str(c)
 
-            subprocess.Popen(["./reca",
+            subprocess.Popen(["./RECA",
                               L,
                               beta,
                               freq,

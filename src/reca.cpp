@@ -34,14 +34,14 @@ int main(int argc, char **argv) {
 
 
   if (argc != 6) {
-    std::cout << "\treca [width] [beta] [percent RECA] [MC steps] [Filebase]\n";
+    std::cout << "\treca [width] [beta] [percent RECA] [MC steps] [Filename]\n";
     return 1;
   }
 
 	seedRand( time(NULL) );
 	// Parameters and outfile
 	std::string file_base(argv[5]);
-	std::string enr_file = file_base+".enr";
+	std::string enr_file = file_base;
 	std::ofstream oenr_file;
 	oenr_file.open(enr_file);
 
@@ -68,13 +68,23 @@ int main(int argc, char **argv) {
 	auto my_reca = std::make_unique<RECA>( jja_state, 1 );
 	auto my_metro = std::make_unique<Metropolis>( jja_state );
 
-
+  int c;
+  double Et, Mx, My;
 	// Gather metrics
 	while (t < t_stop) {
 
 		// Save current t step in states history
 		//my_state->save();
-		oenr_file << jja_state->total_energy() << '\n';
+		c = my_reca->step() + my_metro->step();
+		Et = jja_state->total_energy();
+		Mx = 0;
+		My = 0;
+		for(int i = 0; i < n; ++i) Mx += cos((*jja_state)[i]);
+		for(int i = 0; i < n; ++i) My += sin((*jja_state)[i]); 
+		oenr_file << c  << ' ' 
+		          << Et << ' '
+		          << Mx << ' '
+		          << My << '\n';
 		// Evovle mixed
 		if(rand0_1() < freq){
 			my_reca->evolve_state();
