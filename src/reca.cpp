@@ -42,8 +42,11 @@ int main(int argc, char **argv) {
 	// Parameters and outfile
 	std::string file_base(argv[5]);
 	std::string enr_file = file_base;
+	std::string conf_file = file_base+".conf";
 	std::ofstream oenr_file;
+	std::ofstream oconf_file;
 	oenr_file.open(enr_file);
+	oconf_file.open(conf_file);
 
 	int w = atoi(argv[1]);
 	int n = w * w;
@@ -69,7 +72,7 @@ int main(int argc, char **argv) {
 	auto my_metro = std::make_unique<Metropolis>( jja_state );
 
   int c;
-  double Et, Mx, My;
+  double Et, Mx, My, phi;
 	// Gather metrics
 	while (t < t_stop) {
 
@@ -79,8 +82,14 @@ int main(int argc, char **argv) {
 		Et = jja_state->total_energy();
 		Mx = 0;
 		My = 0;
-		for(int i = 0; i < n; ++i) Mx += cos((*jja_state)[i]);
-		for(int i = 0; i < n; ++i) My += sin((*jja_state)[i]); 
+		oconf_file << c << ' ';
+		for(int i = 0; i < n; ++i){
+		  phi = 2*M_PI*(*jja_state)[i];
+		  oconf_file << phi << ' ';
+		  Mx += cos(phi);
+		  My += sin(phi);
+		}
+		oconf_file << '\n';
 		oenr_file << c  << ' ' 
 		          << Et << ' '
 		          << Mx << ' '
@@ -98,6 +107,7 @@ int main(int argc, char **argv) {
 
 	}
 	oenr_file.close();
+	oconf_file.close();
 	// TODO Replace this system for saving data with a more modular solution
 
 	// std::vector<double> mean_sub;
