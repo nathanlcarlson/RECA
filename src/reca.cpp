@@ -33,12 +33,12 @@ double jja_energy(State* s, int i, int j) {
 int main(int argc, char **argv) {
 
 
-  if (argc != 6) {
-    std::cout << "\treca [width] [beta] [percent RECA] [MC steps] [Filename]\n";
+  if (argc != 7) {
+    std::cout << "\treca [width] [beta] [percent RECA] [MC steps] [Filename] [Seed]\n";
     return 1;
   }
 
-	seedRand( time(NULL) );
+	seedRand( atoi(argv[6]) );
 	// Parameters and outfile
 	std::string file_base(argv[5]);
 	std::string enr_file = file_base;
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 		  My += sin(phi);
 		}
 		oconf_file << '\n';
-		oenr_file << c  << ' ' 
+		oenr_file << c  << ' '
 		          << Et << ' '
 		          << Mx << ' '
 		          << My << '\n';
