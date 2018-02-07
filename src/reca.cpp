@@ -31,22 +31,14 @@ double jja_energy(State* s, int i, int j) {
 }
 
 int main(int argc, char **argv) {
-
-
   if (argc != 7) {
     std::cout << "\treca [width] [beta] [percent RECA] [MC steps] [Filename] [Seed]\n";
     return 1;
   }
-
 	seedRand( atoi(argv[6]) );
+
 	// Parameters and outfile
-	std::string file_base(argv[5]);
-	std::string enr_file = file_base;
-	std::string conf_file = file_base+".conf";
-	std::ofstream oenr_file;
-	std::ofstream oconf_file;
-	oenr_file.open(enr_file);
-	oconf_file.open(conf_file);
+
 
 	int w = atoi(argv[1]);
 	int n = w * w;
@@ -68,32 +60,33 @@ int main(int argc, char **argv) {
 
 
 	// Choices of algorithms
-	auto my_reca = std::make_unique<RECA>( jja_state, 1 );
+	auto my_reca = std::make_unique<RECA>( jja_state );
 	auto my_metro = std::make_unique<Metropolis>( jja_state );
 
-  int c;
+  double c;
   double Et, Mx, My, phi;
+	std::vector<std::array<double, 4>> data;
+	data.resize(t_stop);
+	std::cout << "here\n";
 	// Gather metrics
 	while (t < t_stop) {
 
 		// Save current t step in states history
 		//my_state->save();
-		c = my_reca->step() + my_metro->step();
+		c = (my_reca->step() + my_metro->step())/(double)n;
 		Et = jja_state->total_energy();
 		Mx = 0;
 		My = 0;
-		oconf_file << c << ' ';
 		for(int i = 0; i < n; ++i){
 		  phi = 2*M_PI*(*jja_state)[i];
-		  oconf_file << phi << ' ';
 		  Mx += cos(phi);
 		  My += sin(phi);
 		}
-		oconf_file << '\n';
-		oenr_file << c  << ' '
-		          << Et << ' '
-		          << Mx << ' '
-		          << My << '\n';
+		data[t][0] = c;
+		data[t][1] = Et;
+		data[t][2] = Mx;
+		data[t][3] = My;
+
 		// Evovle mixed
 		if(rand0_1() < freq){
 			my_reca->evolve_state();
@@ -104,10 +97,27 @@ int main(int argc, char **argv) {
 
 		// Advance time
 		t++;
+		// std::cout << t << '\n';
 
 	}
+	std::string file_base(argv[5]);
+	std::string enr_file = file_base;
+	std::ofstream oenr_file;
+	oenr_file.open(enr_file);
+	std::cout << "writing to file\n";
+	for(int i=0; i<t_stop; ++i){
+		c = data[i][0];
+		Et = data[i][1];
+		Mx = data[i][2];
+		My = data[i][3];
+
+		oenr_file << c << ' '
+							<< Et << ' '
+							<< Mx << ' '
+							<< My << '\n';
+	}
+
 	oenr_file.close();
-	oconf_file.close();
 	// TODO Replace this system for saving data with a more modular solution
 
 	// std::vector<double> mean_sub;
