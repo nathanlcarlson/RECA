@@ -58,20 +58,15 @@ class RECA {
 		int m_L;
     int m_step = 0;
 
-		std::shared_ptr<State> m_state;
-		std::shared_ptr<State> m_replica;
 		std::unique_ptr<Cluster> m_cluster;
 
-		// TODO Implement this optimization
 		void crotate_and_exchange(int i, std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
-
 			S_i->shift_one(i, -1*m_R);
 			S_j->shift_one(i, m_R);
 
 			double tmp = (*S_j)[i];
 			(*S_j)[i] = (*S_i)[i];
 			(*S_i)[i] = tmp;
-
 		}
 
 		// Check energy change and add to cluster, or not
@@ -84,7 +79,7 @@ class RECA {
 			double E_f = S_i->energy(i, j) + S_j->energy(i, j);
 			m_step += 5;
 
-			double P = 1 - exp((m_state->B) * (E_f - E_i));
+			double P = 1.0 - exp((S_i->B) * (E_f - E_i));
 
 			if ( rand0_1() < P ) {
 				m_cluster->add(j);
@@ -109,28 +104,23 @@ class RECA {
 		}
 
 	public:
-		RECA(std::shared_ptr<State> t_state)
-			: m_state(t_state)
+		RECA(int _L)
+			: m_L(_L)
 		{
-			m_L = m_state->size();
-
-			m_replica = std::make_shared<State>( *m_state );
-			m_replica->randomize_all();
-
 			m_cluster = std::make_unique<Cluster>( m_L );
 		}
-		void evolve_state() {
+		void evolve_state(std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
 
 			// Set rotation
-			m_R = m_state->get_shift();
+			m_R = S_i->get_shift();
 
 			// Seed site
 			int i = randN(m_L);
-			crotate_and_exchange(i, m_replica, m_state);
+			crotate_and_exchange(i, S_i, S_j);
 			m_cluster->add(i);
 
 			// Propigate from seed site, building the cluster
-			propigate(i, m_replica, m_state);
+			propigate(i, S_i, S_j);
 			m_cluster->clear();
 
 		}
@@ -143,55 +133,51 @@ class Metropolis {
 
 	private:
 
-		int m_L;
 		int m_step = 0;
-		std::shared_ptr<State> m_state;
 
 	public:
 
-		Metropolis(std::shared_ptr<State> t_state)
-			: m_state(t_state)
+		Metropolis()
 		{
-			m_L = m_state->size();
 		}
 
-		void evolve_state() {
+		void evolve_state(std::shared_ptr<State> _state) {
 
 			// Select site to propose change
-			int i = randN(m_L);
-			double initial = (*m_state)[i];
+			int i = randN(_state->size());
+			double initial = (*_state)[i];
 			double E_i = 0;
 			double E_f = 0;
 
 			// Calculate initial energy
-			for (auto neighbor = m_state->bonds()->begin(i); neighbor != m_state->bonds()->end(i); ++neighbor) {
+			for (auto neighbor = _state->bonds()->begin(i); neighbor != _state->bonds()->end(i); ++neighbor) {
 
 				int j = *neighbor;
-				E_i += m_state->energy(i, j);
+				E_i += _state->energy(i, j);
 				m_step++;
 
 			}
 
 			// Make change
-			m_state->randomize_one(i);
+			_state->randomize_one(i);
 
 			// Calculate new energy
-			for (auto neighbor = m_state->bonds()->begin(i); neighbor != m_state->bonds()->end(i); ++neighbor) {
+			for (auto neighbor = _state->bonds()->begin(i); neighbor != _state->bonds()->end(i); ++neighbor) {
 
 				int j = *neighbor;
-				E_f += m_state->energy(i, j);
+				E_f += _state->energy(i, j);
 				m_step++;
 
 			}
 
 			// Accept change?
-			double P = exp((m_state->B) * (E_i - E_f));
+			double P = exp((_state->B) * (E_i - E_f));
 			m_step++;
 
 			if (P < 1 && rand0_1() < (1.0 - P) ) {
 
 				// Reject change, back to initial
-				(*m_state)[i] = initial;
+				(*_state)[i] = initial;
 
 			}
 		}

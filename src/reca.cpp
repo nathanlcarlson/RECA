@@ -57,11 +57,12 @@ int main(int argc, char **argv) {
 	auto nodes_A = std::make_shared<Node>(1.0);
 	//  Define state
 	auto jja_state = std::make_shared<State>(n, beta, jja_energy, bondsA, nodes_A);
-
+	auto jja_replica = std::make_shared<State>( *jja_state );
+	jja_replica->randomize_all();
 
 	// Choices of algorithms
-	auto my_reca = std::make_unique<RECA>( jja_state );
-	auto my_metro = std::make_unique<Metropolis>( jja_state );
+	auto my_reca = std::make_unique<RECA>( n );
+	auto my_metro = std::make_unique<Metropolis>( );
 
   double c;
   double Et, Mx, My, phi;
@@ -89,10 +90,11 @@ int main(int argc, char **argv) {
 
 		// Evovle mixed
 		if(rand0_1() < freq){
-			my_reca->evolve_state();
+			my_reca->evolve_state(jja_state, jja_replica);
 		}
 		else {
-			my_metro->evolve_state();
+			my_metro->evolve_state(jja_state);
+			my_metro->evolve_state(jja_replica);
 		}
 
 		// Advance time
