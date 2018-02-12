@@ -91,7 +91,7 @@ class Node {
         return v;
       }
       else{
-        return m_shift_vals[m_loc[_cur]][(int)_shift];
+        return m_shift_vals[m_loc[_cur]][mod((int)_shift, m_N)];
       }
     }
 
