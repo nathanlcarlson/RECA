@@ -40,7 +40,7 @@ double ising_energy(State* t, int i, int j) {
 	return -1 * (*t)[i] * (*t)[j];
 }
 // Makes graphic
-void display_state(std::shared_ptr<State> state, int n, int n_states, int pos) {
+void display_state(const std::shared_ptr<State>& state, int n, int n_states, int pos) {
 
 	int c = 0;
 	double dmax = sqrt(n_states);
@@ -144,10 +144,15 @@ int main(int argc, char **argv) {
 
 	// N Replicas to use
 	int n_replicas = atoi(argv[6]);
+	std::vector<std::shared_ptr<State>> replicas;
+	for(int i=0; i<n_replicas; ++i){
+		replicas.push_back(std::make_shared<State>( *my_state ));
+		replicas[i]->randomize_all();
+	}
 
 	// Choices of algorithms
-	auto my_reca = std::make_unique<RECA>( my_state, n_replicas );
-	auto my_metro = std::make_unique<Metropolis>( my_state );
+	auto my_reca = std::make_unique<RECA>( n );
+	auto my_metro = std::make_unique<Metropolis>();
 
 	// Begin graphics setup
 	GLFWwindow *window;
@@ -182,26 +187,29 @@ int main(int argc, char **argv) {
 		// Step the state forward
 		// Evovle mixed
 		if(rand0_1() < freq){
-			my_reca->evolve_state();
+			my_reca->evolve_state(my_state, replicas[randN(n_replicas)]);
 		}
 		else {
-			my_metro->evolve_state();
+			my_metro->evolve_state(my_state);
+			for( auto& replica: replicas){
+				my_metro->evolve_state(replica);
+			}
 		}
+
 		count--;
 		n_steps++;
 		if (count == 0) {
 			glClear(GL_COLOR_BUFFER_BIT);
+			// TODO Fix this strategy for multiple states
 			display_state(my_state, w, n_replicas+1, n_replicas+1);
 			for(int i = 0; i < n_replicas; i++){
-				display_state(my_reca->get_replica(i), w, n_replicas+1, i+1);
+				display_state(replicas[i], w, n_replicas+1, i+1);
 			}
 			glfwSwapBuffers(window);
+
 			// Poll for and process events
 			glfwPollEvents();
 			count = interval;
-			std::cout << n_steps << '\n';
-			std::cout << "Press enter to continue\n";
-      getchar();
 		}
 		// Poll for and process events
 		glfwPollEvents();
