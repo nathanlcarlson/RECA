@@ -3,6 +3,7 @@ import argparse
 import os
 import subprocess
 import yaml
+from random import randint
 
 def main():
     parser = argparse.ArgumentParser(description='')
@@ -34,7 +35,8 @@ def main():
                               beta,
                               freq,
                               str(yargs['steps']),
-                              path
+                              path,
+                              str(randint(0,pow(2,20)))
                               ],
                               stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT)

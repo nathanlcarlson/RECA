@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <unordered_map>
 #include "utils.hpp"
 
 class Node {
@@ -13,8 +14,19 @@ class Node {
     int m_Min;
     int m_Max;
     std::vector<double> m_values;
+    std::vector<std::vector<double>> m_shift_vals;
+    std::unordered_map<double, int>  m_loc;
     double m_shift;
 
+    void populate_shift_info(){
+      m_shift_vals.resize(m_N);
+      for(int i=0; i<m_N; ++i){
+        m_loc[m_values[i]] = i;
+        for(int j=0; j<m_N; ++j){
+          m_shift_vals[i].push_back(m_values[(i+j)%m_N]);
+        }
+      }
+    }
   public:
     // Assume 0 to max, exclusive, continuous
     Node(double _max)
@@ -42,13 +54,15 @@ class Node {
         v += _step;
       }
       m_N = m_values.size();
+      populate_shift_info();
     }
 
-    // Values given
+    // Values given, discrete
     Node(std::vector<double>& _v)
     {
       m_values = _v;
       m_N = m_values.size();
+      populate_shift_info();
     }
 
     // Select random value
@@ -77,9 +91,7 @@ class Node {
         return v;
       }
       else{
-        int i = std::find(m_values.begin(), m_values.end(), _cur) - m_values.begin();
-
-        return m_values[mod(i + (int)_shift, m_N)];
+        return m_shift_vals[m_loc[_cur]][mod((int)_shift, m_N)];
       }
     }
 
@@ -102,7 +114,7 @@ class Node {
         return { hueToRGB(r + 0.3333) , hueToRGB(r) , hueToRGB(r - 0.3333)};
       }
       else{
-        int i = std::find(m_values.begin(), m_values.end(), _v) - m_values.begin();
+        int i = m_loc[_v];
         r = i/(double)(m_N-1);
         return { r , r, r};
       }
