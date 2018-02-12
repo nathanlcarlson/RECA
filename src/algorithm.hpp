@@ -59,8 +59,10 @@ class RECA {
     int m_step = 0;
 
 		Cluster m_cluster;
+		std::shared_ptr<State> S_i;
+		std::shared_ptr<State> S_j;
 
-		void crotate_and_exchange(int i, std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
+		void crotate_and_exchange(int i) {
 			S_i->shift_one(i, -1*m_R);
 			S_j->shift_one(i, m_R);
 
@@ -70,12 +72,12 @@ class RECA {
 		}
 
 		// Check energy change and add to cluster, or not
-		void q_swap(int i, int j, std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
+		void q_swap(int i, int j) {
 			double U_i = (*S_i)[j];
 			double R_i = (*S_j)[j];
 
 			double E_i = S_i->energy(i, j) + S_j->energy(i, j);
-			crotate_and_exchange(j, S_i, S_j);
+			crotate_and_exchange(j);
 			double E_f = S_i->energy(i, j) + S_j->energy(i, j);
 			m_step += 5;
 
@@ -84,7 +86,7 @@ class RECA {
 			if ( rand0_1() < P ) {
 				m_cluster.add(j);
 				// Propigate from this new site
-				propigate(j, S_i, S_j);
+				propigate(j);
 			}
 			else {
 				// Reset values to initial
@@ -94,11 +96,11 @@ class RECA {
 		}
 
 		// Recursively called to grow cluster
-		void propigate(int i, std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
+		void propigate(int i) {
 			for (auto neighbor = S_i->bonds()->begin(i); neighbor != S_i->bonds()->end(i); ++neighbor) {
 				int j = *neighbor;
 				if (!(m_cluster.contains(j))) {
-					q_swap(i, j, S_i, S_j);
+					q_swap(i, j);
 				}
 			}
 		}
@@ -108,18 +110,21 @@ class RECA {
 			: m_L(_L), m_cluster(_L)
 		{}
 
-		void evolve_state(std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
+		void evolve_state(const std::shared_ptr<State>& _S_i, const std::shared_ptr<State>& _S_j) {
+
+			S_i = _S_i;
+			S_j = _S_j;
 
 			// Set rotation
 			m_R = S_i->get_shift();
 
 			// Seed site
 			int i = randN(m_L);
-			crotate_and_exchange(i, S_i, S_j);
+			crotate_and_exchange(i);
 			m_cluster.add(i);
 
 			// Propigate from seed site, building the cluster
-			propigate(i, S_i, S_j);
+			propigate(i);
 
 			// Reaches here when all propigation fails, or the entire state is added to the cluster
 			m_cluster.clear();
@@ -142,7 +147,7 @@ class Metropolis {
 		{
 		}
 
-		void evolve_state(std::shared_ptr<State> _state) {
+		void evolve_state(const std::shared_ptr<State>& _state) {
 
 			// Select site to propose change
 			int i = randN(_state->size());
