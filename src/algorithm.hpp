@@ -58,7 +58,7 @@ class RECA {
 		int m_L;
     int m_step = 0;
 
-		std::unique_ptr<Cluster> m_cluster;
+		Cluster m_cluster;
 
 		void crotate_and_exchange(int i, std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
 			S_i->shift_one(i, -1*m_R);
@@ -82,7 +82,7 @@ class RECA {
 			double P = 1.0 - exp((S_i->B) * (E_f - E_i));
 
 			if ( rand0_1() < P ) {
-				m_cluster->add(j);
+				m_cluster.add(j);
 				// Propigate from this new site
 				propigate(j, S_i, S_j);
 			}
@@ -97,7 +97,7 @@ class RECA {
 		void propigate(int i, std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
 			for (auto neighbor = S_i->bonds()->begin(i); neighbor != S_i->bonds()->end(i); ++neighbor) {
 				int j = *neighbor;
-				if (!(m_cluster->contains(j))) {
+				if (!(m_cluster.contains(j))) {
 					q_swap(i, j, S_i, S_j);
 				}
 			}
@@ -105,10 +105,9 @@ class RECA {
 
 	public:
 		RECA(int _L)
-			: m_L(_L)
-		{
-			m_cluster = std::make_unique<Cluster>( m_L );
-		}
+			: m_L(_L), m_cluster(_L)
+		{}
+
 		void evolve_state(std::shared_ptr<State> S_i, std::shared_ptr<State> S_j) {
 
 			// Set rotation
@@ -117,11 +116,13 @@ class RECA {
 			// Seed site
 			int i = randN(m_L);
 			crotate_and_exchange(i, S_i, S_j);
-			m_cluster->add(i);
+			m_cluster.add(i);
 
 			// Propigate from seed site, building the cluster
 			propigate(i, S_i, S_j);
-			m_cluster->clear();
+
+			// Reaches here when all propigation fails, or the entire state is added to the cluster
+			m_cluster.clear();
 
 		}
 		int step() {
