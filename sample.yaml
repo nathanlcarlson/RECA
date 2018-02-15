@@ -1,14 +1,15 @@
 samples: 1
 beta:
-  - 1
-  - 2
   - 3
 width:
-  - 10
+  - 80
 percent_RECA:
   - 0
-  - 5
-  - 95
-  - 100
+  - 0.5
+  - 1
 root: data
-steps : 32768
+pri_or_all : 1
+seed : 1
+n_states:
+  - 8
+  - 16

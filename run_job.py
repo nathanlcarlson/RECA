@@ -20,8 +20,7 @@ def main():
                 'samples': 5,
                 'root': 'data',
                 'pri_or_all': 0,
-                'seed': str(randint(0,pow(2,20))),
-                'n_states': [2]
+                'n_states': [8]
                 }
 
     yargs = set_defaults(yargs, ydefaults)
@@ -37,6 +36,10 @@ def main():
                 freq = str(freq)
                 N = str(N)
                 S = str(yargs['pri_or_all'])
+                if 'seed' in yargs.keys():
+                    seed = str(yargs['seed'])
+                else:
+                    seed = str(randint(0,pow(2,20)))
 
                 mkdirs(yargs['root']+"/N"+N+"/L"+L+"/Beta"+beta+"/Freq"+freq)
                 path = yargs['root']+"/N"+N+"/L"+L+"/Beta"+beta+"/Freq"+freq+"/"+str(c)
@@ -48,7 +51,7 @@ def main():
                                   freq,
                                   S,
                                   path,
-                                  yargs['seed'],
+                                  seed,
                                   N
                                   ],
                                   stdout=subprocess.PIPE,
