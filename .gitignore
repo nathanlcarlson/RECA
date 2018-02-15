@@ -1,10 +1,11 @@
 *.o
-test
-main
 RECA
+GRAPHICS
 data/
 src/*~
 *~
 proc/*~
 obj/*
 build/*
+config/
+images/

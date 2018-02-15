@@ -10,7 +10,9 @@ A Python script is included to run batch jobs. A configuration file using YAML f
 | *beta* | Values of Beta, inverse temperature | [1] | List of Numbers
 | *width* | Simulation is square array, these are the widths to use | [10] | List of Integers
 | *percent_RECA* | This is tuned to test RECA and Metropolis mixes | [5] | List of Numbers, 0 - 100
-| *steps* | Number of Monte Carlo steps in a simulation | 2^15 | Integer
+| *n_states* | Number of States to use | [8] | List of Integers, 2 - N
+| *seed* | Seed for Random Number Generator | Random Integer 0 - 2^20 | Integer
+| *pri_or_all* | Whether Metropolis operates on only the primary or all States | 0 | Integer, 0 for Primary, 1 for All
 | *samples* | Number of times to simulate each set of parameters | 5 | Integer
 | *root* | The root level for data file storage | 'data' | String
 

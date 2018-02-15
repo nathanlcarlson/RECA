@@ -12,7 +12,8 @@
 
 // Used as an ID
 #define A 'A'
-
+#define PRI 0
+#define ALL 1
 // May use different type of bonds, os typedef
 typedef StaticCouplings2D Bonds;
 
@@ -31,8 +32,8 @@ double jja_energy(State* s, int i, int j) {
 }
 
 int main(int argc, char **argv) {
-  if (argc != 7) {
-    std::cout << "\treca [width] [beta] [percent RECA] [MC steps] [Filename] [Seed]\n";
+  if (argc != 8) {
+    std::cout << "\treca [width] [beta] [percent RECA] [All or Pri] [Filename] [Seed] [N states]\n";
     return 1;
   }
 	seedRand( atoi(argv[6]) );
@@ -44,70 +45,82 @@ int main(int argc, char **argv) {
 	int n = w * w;
 	double beta = atof(argv[2]);
 	double freq = atof(argv[3])/100.0;
-	int t = 0;
-  int t_stop = atoi(argv[4]);
-
+	int all_or_pri = atoi(argv[4]);
+	int n_states = atoi(argv[7]);
 
 	// XY+A model
 	//  Set-up bonds
 	auto bonds_A = std::make_shared<Bonds>(A, n, a_coupling_energy);
 	bonds_A->square2D(false);
 	std::vector<std::shared_ptr<Bonds>> bondsA{bonds_A};
+
 	//  Define node values
 	auto nodes_A = std::make_shared<Node>(1.0);
-	//  Define state
-	auto jja_state = std::make_shared<State>(n, beta, jja_energy, bondsA, nodes_A);
-	auto jja_replica = std::make_shared<State>( *jja_state );
-	jja_replica->randomize_all();
+
+	//  Define states
+	std::vector<std::shared_ptr<State>>  state_pool;
+	for(int i=0; i<n_states; ++i){
+		state_pool.push_back(std::make_shared<State>(n, beta, jja_energy, bondsA, nodes_A));
+	}
 
 	// Choices of algorithms
-	auto my_reca = std::make_unique<RECA>( n );
-	auto my_metro = std::make_unique<Metropolis>( );
+	auto reca = std::make_unique<RECA>( n );
+	auto metro = std::make_unique<Metropolis>( );
 
-  double c;
+	double c = 0;
+  double c_max = 1 << 15;
+	double c_interval = 50;
   double Et, Mx, My, phi;
+
 	std::vector<std::array<double, 4>> data;
-	data.resize(t_stop);
-	std::cout << "here\n";
+	std::cout << "Initialization successful, beginning simulation...\n";
 	// Gather metrics
-	while (t < t_stop) {
+	while (c < c_max) {
 
 		// Save current t step in states history
 		//my_state->save();
-		c = (my_reca->step() + my_metro->step())/(double)n;
-		Et = jja_state->total_energy();
+		std::array<double, 4> c_data{0.,0.,0.,0.};
+
+		c = (reca->step() + metro->step())/(double)n;
+		Et = state_pool[PRI]->total_energy();
 		Mx = 0;
 		My = 0;
 		for(int i = 0; i < n; ++i){
-		  phi = 2*M_PI*(*jja_state)[i];
+		  phi = 2*M_PI*(*state_pool[PRI])[i];
 		  Mx += cos(phi);
 		  My += sin(phi);
 		}
-		data[t][0] = c;
-		data[t][1] = Et;
-		data[t][2] = Mx;
-		data[t][3] = My;
-
+		c_data[0] = c;
+		c_data[1] = Et;
+		c_data[2] = Mx;
+		c_data[3] = My;
+		data.push_back(c_data);
 		// Evovle mixed
-		if(rand0_1() < freq){
-			my_reca->evolve_state(jja_state, jja_replica);
+		while((reca->step() + metro->step())/(double)n - c < c_interval){
+			if(rand0_1() < freq){
+				reca->evolve_state(state_pool[PRI], state_pool[1+randN(n_states-1)]);
+			}
+			else {
+				if(all_or_pri == PRI || freq == 0){
+					metro->evolve_state(state_pool[PRI]);
+				}
+				else if(all_or_pri == ALL){
+					for(int i=0; i<n_states; ++i){
+						metro->evolve_state(state_pool[i]);
+					}
+				}
+				else{
+					metro->evolve_state(state_pool[PRI]);
+				}
+			}
 		}
-		else {
-			my_metro->evolve_state(jja_state);
-			my_metro->evolve_state(jja_replica);
-		}
-
-		// Advance time
-		t++;
-		// std::cout << t << '\n';
-
 	}
 	std::string file_base(argv[5]);
 	std::string enr_file = file_base;
 	std::ofstream oenr_file;
 	oenr_file.open(enr_file);
 	std::cout << "writing to file\n";
-	for(int i=0; i<t_stop; ++i){
+	for(int i=0; i<data.size(); ++i){
 		c = data[i][0];
 		Et = data[i][1];
 		Mx = data[i][2];
