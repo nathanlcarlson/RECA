@@ -57,24 +57,18 @@ class State {
 
 		// Shift all with help of Node class
 		void shift_all() {
-
-			m_node->set_shift();
 			for(int i = 0; i < m_L; ++i) {
 				m_v[i] = m_node->shifted_value(m_v[i]);
 			}
-
 		}
 
 		// Shift one site with help of Node class
 		void shift_one(int i, double _s) {
-
 			m_v[i] = m_node->shifted_value(m_v[i], _s);
-
 		}
 
 		double get_shift() {
-
-			return m_node->set_shift();		
+			return m_node->get_shift();
 		}
 
 		// Randomizes the whole state with help of Node class
@@ -87,20 +81,17 @@ class State {
 		}
 
 		// Randomizes one with help of Node class
-		int randomize_one(int i = -1) {
-
-			if(i == -1) {
-				i = randN(m_v.size());
-			}
-
+		int randomize_one(int i) {
 			m_v[i] = m_node->random_value();
-
 			return i;
+		}
+		int randomize_one(){
+			return randomize_one(randN(m_L));
 		}
 
 		// Get color with help of Node class
-		std::vector<double> getColor(int i) {
-			return m_node->getRGB(m_v[i]);
+		void getColor(int i, std::vector<double>& _rgb_out) {
+			return m_node->getRGB(m_v[i], _rgb_out);
 		}
 
 		// TODO Replace this system for saving data with a more modular solution
