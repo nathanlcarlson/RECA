@@ -2,7 +2,6 @@
 #define NODE_HPP
 
 #include <vector>
-#include "utils.hpp"
 
 class Node {
 
