@@ -2,13 +2,14 @@
 #include <fstream>
 #include <algorithm>
 #include <memory>
+#include <array>
 #include <math.h>
 
 #include "utils.hpp"
 #include "couplings.hpp"
 #include "state.hpp"
 #include "algorithm.hpp"
-#include "node.hpp"
+#include "continuous.hpp"
 
 // Used as an ID
 #define A 'A'
@@ -55,7 +56,7 @@ int main(int argc, char **argv) {
 	std::vector<std::shared_ptr<Bonds>> bondsA{bonds_A};
 
 	//  Define node values
-	auto nodes_A = std::make_shared<Node>(1.0);
+	auto nodes_A = std::make_shared<Continuous>(1.0);
 
 	//  Define states
 	std::vector<std::shared_ptr<State>>  state_pool;
@@ -75,11 +76,11 @@ int main(int argc, char **argv) {
 	std::vector<std::array<double, 4>> data;
 	std::cout << "Initialization successful, beginning simulation...\n";
 	// Gather metrics
+	std::array<double, 4> c_data;
 	while (c < c_max) {
 
 		// Save current t step in states history
 		//my_state->save();
-		std::array<double, 4> c_data{0.,0.,0.,0.};
 
 		c = (reca->step() + metro->step())/(double)n;
 		Et = state_pool[PRI]->total_energy();

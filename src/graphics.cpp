@@ -6,7 +6,8 @@
 #include "couplings.hpp"
 #include "state.hpp"
 #include "algorithm.hpp"
-#include "node.hpp"
+#include "discrete.hpp"
+#include "continuous.hpp"
 
 // Used as an ID
 #define A 'A'
@@ -58,16 +59,16 @@ void display_state(const std::shared_ptr<State>& state, int n, int n_states, int
 		posy = ( (pos - 1)/ max) - max/2;
 	}
 	double w = 0.8/(n * max);
+	std::vector<double> _rgb;
+	_rgb.resize(3);
 	for (int i = -n / 2 + posx; i < n / 2 + posx; i++) {
 		for (int j = -n / 2 + posy ; j < n / 2 + posy; j++) {
 
 			glBegin(GL_TRIANGLES);
 			// Get color
-			auto color = state->getColor(c);
+			state->getColor(c, _rgb);
 
-			glColor3f(color[0],
-					      color[1],
-					      color[2]);
+			glColor3f(_rgb[0], _rgb[1], _rgb[2]);
 			c++;
 			// Make Square
 			double x1 = 2 * w * (i ) ;
@@ -121,7 +122,7 @@ int main(int argc, char **argv) {
 	bonds_A->scale_all( 1.0/w );
 	std::vector<std::shared_ptr<Bonds>> bondsA{bonds_A};
 	//  Define node values
-	auto nodes_A = std::make_shared<Node>(1.0);
+	auto nodes_A = std::make_shared<Continuous>(1.0);
 	//  Define state
 	auto jja_state = std::make_shared<State>(n, beta, jja_energy, bondsA, nodes_A);
 
@@ -132,7 +133,7 @@ int main(int argc, char **argv) {
 	std::vector<std::shared_ptr<Bonds>> bondsJ{bonds_J};
 	//  Define node values
 	std::vector<double> ising_nodes{-1.0, 1.0};
-	auto nodes_J = std::make_shared<Node>(ising_nodes);
+	auto nodes_J = std::make_shared<Discrete>(ising_nodes);
 	//  Define state
 	auto ising_state = std::make_shared<State>(n, beta, ising_energy, bondsJ, nodes_J);
 
