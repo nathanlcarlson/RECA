@@ -1,6 +1,6 @@
 #ifndef CONTINUOUS_HPP
 #define CONTINUOUS_HPP
-
+//TODO Split into header/implementation
 #include <vector>
 #include "utils.hpp"
 #include "node.hpp"

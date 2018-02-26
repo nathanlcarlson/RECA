@@ -1,6 +1,6 @@
 #ifndef DISCRETE_HPP
 #define DISCRETE_HPP
-
+//TODO Split into header/implementation
 #include <vector>
 #include <unordered_map>
 #include "utils.hpp"
