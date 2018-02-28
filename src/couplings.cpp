@@ -1,27 +1,27 @@
 #include "couplings.hpp"
 
-
-StaticCouplings2D::StaticCouplings2D(char t_id, int t_n, CouplingEnergyFunction_Ptr t_f)
-  : m_energy(t_f), m_size(t_n), id(t_id)
+StaticCouplings2D::StaticCouplings2D(char t_id, int t_n, std::string t_periodic, CouplingEnergyFunction_Ptr t_f)
+  : m_energy(t_f), m_L(t_n), m_id(t_id)
 {
 	m_map.resize(t_n);
   m_neighbors.resize(t_n);
+  if(t_periodic=="periodic"){
+    square2D(true);
+  }
+  else if(t_periodic=="aperiodic"){
+    square2D(false);
+  }
 }
-
-double&StaticCouplings2D::operator()(int t_i, int t_j) {
-
-	return m_map[t_i][t_j];
+char StaticCouplings2D::get_id(){
+  return m_id;
 }
-
 void StaticCouplings2D::square2D(bool periodic) {
 
-	int w = std::sqrt(m_size);
-	int j;
-	int x;
-	int y;
+	int w = std::sqrt(m_L);
+	int j, x, y;
 
 	if (periodic) {
-		for (int i = 0; i < m_size; i++) {
+		for (int i = 0; i < m_L; i++) {
 			x = i % w;
 			y = i / w;
 			j = w * y + mod(i + 1, w);
@@ -32,22 +32,21 @@ void StaticCouplings2D::square2D(bool periodic) {
 			m_map[i][j] = m_energy(
 			    make_node(x, y, 0),
 			    make_node(j % w, j / w, 0));
-			j = mod(i + w, m_size);
+			j = mod(i + w, m_L);
 			m_map[i][j] = m_energy(
 			    make_node(x, y, 0),
 			    make_node(j % w, j / w, 0));
-			j = mod(i - w, m_size);
+			j = mod(i - w, m_L);
 			m_map[i][j] = m_energy(
 			    make_node(x, y, 0),
 			    make_node(j % w, j / w, 0));
 		}
 	}
 	else {
-		for (int i = 0; i < m_size; i++) {
+		for (int i = 0; i < m_L; i++) {
 			x = i % w;
 			y = i / w;
 			if ((i + 1) % w != 0) {
-
 				j = w * y + mod(i + 1, w);
 				m_map[i][j] = m_energy(
 				    make_node(x, y, 0),
@@ -55,24 +54,21 @@ void StaticCouplings2D::square2D(bool periodic) {
 
 			}
 			if (x != 0) {
-
 				j = w * y + mod(i - 1, w);
 				m_map[i][j] = m_energy(
 				    make_node(x, y, 0),
 				    make_node(j % w, j / w, 0));
 
 			}
-			if (i + w < m_size) {
-
-				j = mod(i + w, m_size);
+			if (i + w < m_L) {
+				j = mod(i + w, m_L);
 				m_map[i][j] = m_energy(
 				    make_node(x, y, 0),
 				    make_node(j % w, j / w, 0));
 
 			}
 			if (i - w >= 0) {
-
-				j = mod(i - w, m_size);
+				j = mod(i - w, m_L);
 				m_map[i][j] = m_energy(
 				    make_node(x, y, 0),
 				    make_node(j % w, j / w, 0));
@@ -108,7 +104,7 @@ void StaticCouplings2D::scale_all(double factor) {
 }
 void StaticCouplings2D::save_couplings() {
 
-  for(int i = 0; i < m_size; i++) {
+  for(int i = 0; i < m_L; i++) {
     for (auto it = m_map[i].begin(); it != m_map[i].end(); ++it) {
       m_neighbors[i].push_back(it->first);
     }
