@@ -13,9 +13,6 @@
 #define A 'A'
 #define J 'J'
 
-// May use different type of bonds, os typedef
-typedef StaticCouplings2D Bonds;
-
 // Define how to calculate bond energy between two nodes for jja
 double a_coupling_energy(node i, node j) {
 
@@ -117,25 +114,24 @@ int main(int argc, char **argv) {
 
 	// XY+A model
 	//  Set-up bonds
-	auto bonds_A = std::make_shared<Bonds>(A, n, a_coupling_energy);
-	bonds_A->square2D(false);
+	auto bonds_A = std::make_shared<StaticCouplings2D>(A, n, "aperiodic", a_coupling_energy);
 	bonds_A->scale_all( 1.0/w );
-	std::vector<std::shared_ptr<Bonds>> bondsA{bonds_A};
+
 	//  Define node values
 	auto nodes_A = std::make_shared<Continuous>(1.0);
 	//  Define state
-	auto jja_state = std::make_shared<State>(n, beta, jja_energy, bondsA, nodes_A);
+	auto jja_state = std::make_shared<State>(n, beta, jja_energy, bonds_A, nodes_A);
 
 	// Ising model
 	//  Set-up bonds
-	auto bonds_J = std::make_shared<Bonds>(J, n, ising_coupling_energy);
-	bonds_J->square2D(true);
-	std::vector<std::shared_ptr<Bonds>> bondsJ{bonds_J};
+	auto bonds_J = std::make_shared<StaticCouplings2D>(J, n, "periodic", ising_coupling_energy);
+
+
 	//  Define node values
 	std::vector<double> ising_nodes{-1.0, 1.0};
 	auto nodes_J = std::make_shared<Discrete>(ising_nodes);
 	//  Define state
-	auto ising_state = std::make_shared<State>(n, beta, ising_energy, bondsJ, nodes_J);
+	auto ising_state = std::make_shared<State>(n, beta, ising_energy, bonds_J, nodes_J);
 
 	auto my_state = std::make_shared<State>( *jja_state );
 	std::string state(argv[5]);

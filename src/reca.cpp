@@ -10,13 +10,12 @@
 #include "state.hpp"
 #include "algorithm.hpp"
 #include "continuous.hpp"
+#include "bonds.hpp"
 
 // Used as an ID
 #define A 'A'
 #define PRI 0
 #define ALL 1
-// May use different type of bonds, os typedef
-typedef StaticCouplings2D Bonds;
 
 // Define how to calculate bond energy between
 double a_coupling_energy(node i, node j) {
@@ -51,9 +50,7 @@ int main(int argc, char **argv) {
 
 	// XY+A model
 	//  Set-up bonds
-	auto bonds_A = std::make_shared<Bonds>(A, n, a_coupling_energy);
-	bonds_A->square2D(false);
-	std::vector<std::shared_ptr<Bonds>> bondsA{bonds_A};
+	auto bonds_A = std::make_shared<StaticCouplings2D>(A, n, "aperiodic", a_coupling_energy);
 
 	//  Define node values
 	auto nodes_A = std::make_shared<Continuous>(1.0);
@@ -61,7 +58,7 @@ int main(int argc, char **argv) {
 	//  Define states
 	std::vector<std::shared_ptr<State>>  state_pool;
 	for(int i=0; i<n_states; ++i){
-		state_pool.push_back(std::make_shared<State>(n, beta, jja_energy, bondsA, nodes_A));
+		state_pool.push_back(std::make_shared<State>(n, beta, jja_energy, bonds_A, nodes_A));
 	}
 
 	// Choices of algorithms
