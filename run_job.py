@@ -44,7 +44,7 @@ def main():
                 mkdirs(yargs['root']+"/N"+N+"/L"+L+"/Beta"+beta+"/Freq"+freq)
                 path = yargs['root']+"/N"+N+"/L"+L+"/Beta"+beta+"/Freq"+freq+"/"+str(c)
 
-                print "./RECA",L,beta,freq,S,path,yargs['seed'],N
+                print "./RECA",L,beta,freq,S,path,seed,N
                 subprocess.Popen(["./RECA",
                                   L,
                                   beta,
