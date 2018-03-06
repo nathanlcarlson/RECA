@@ -76,9 +76,6 @@ int main(int argc, char **argv) {
 	std::array<double, 4> c_data;
 	while (c < c_max) {
 
-		// Save current t step in states history
-		//my_state->save();
-
 		c = (reca->step() + metro->step())/(double)n;
 		Et = state_pool[PRI]->total_energy();
 		Mx = 0;
@@ -96,7 +93,10 @@ int main(int argc, char **argv) {
 		// Evovle mixed
 		while((reca->step() + metro->step())/(double)n - c < c_interval){
 			if(rand0_1() < freq){
-				reca->evolve_state(state_pool[PRI], state_pool[1+randN(n_states-1)]);
+				int r1 = randN(n_states);
+				int r2 = randN(n_states-1);
+				if(r2>=r1) r2++;
+				reca->evolve_state(state_pool[r1], state_pool[r2]);
 			}
 			else {
 				if(all_or_pri == PRI || freq == 0){

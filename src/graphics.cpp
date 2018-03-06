@@ -140,11 +140,12 @@ int main(int argc, char **argv) {
 	}
 
 	// N Replicas to use
-	int n_replicas = atoi(argv[6]);
-	std::vector<std::shared_ptr<State>> replicas;
-	for(int i=0; i<n_replicas; ++i){
-		replicas.push_back(std::make_shared<State>( *my_state ));
-		replicas[i]->randomize_all();
+	int n_states = atoi(argv[6]);
+	//  Define states
+	std::vector<std::shared_ptr<State>>  state_pool;
+	for(int i=0; i<n_states; ++i){
+		state_pool.push_back(std::make_shared<State>(*my_state));
+		state_pool[i]->randomize_all();
 	}
 
 	// Choices of algorithms
@@ -178,29 +179,28 @@ int main(int argc, char **argv) {
 	// Only render according to interval
 	int interval = atoi(argv[4]);
 	int count = interval;
-	int n_steps = 0;
 	while (!glfwWindowShouldClose(window)) {
 
 		// Step the state forward
 		// Evovle mixed
 		if(rand0_1() < freq){
-			my_reca->evolve_state(my_state, replicas[randN(n_replicas)]);
+			int r1 = randN(n_states);
+			int r2 = randN(n_states-1);
+			if(r2>=r1) r2++;
+			my_reca->evolve_state(state_pool[r1], state_pool[r2]);
 		}
 		else {
 			my_metro->evolve_state(my_state);
-			for( auto& replica: replicas){
+			for( auto& replica: state_pool){
 				my_metro->evolve_state(replica);
 			}
 		}
 
 		count--;
-		n_steps++;
 		if (count == 0) {
 			glClear(GL_COLOR_BUFFER_BIT);
-			// TODO Fix this strategy for multiple states
-			display_state(my_state, w, n_replicas+1, n_replicas+1);
-			for(int i = 0; i < n_replicas; i++){
-				display_state(replicas[i], w, n_replicas+1, i+1);
+			for(int i = 0; i < n_states; i++){
+				display_state(state_pool[i], w, n_states, i);
 			}
 			glfwSwapBuffers(window);
 

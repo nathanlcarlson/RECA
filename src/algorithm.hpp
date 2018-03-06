@@ -2,6 +2,7 @@
 #define ALGORITHM_HPP
 
 #include <limits>
+#include <stack>
 #include "state.hpp"
 
 // Store info for cluster growth
@@ -61,6 +62,7 @@ class RECA {
 		Cluster m_cluster;
 		std::shared_ptr<State> S_i;
 		std::shared_ptr<State> S_j;
+		std::stack<int> m_stack;
 
 		void crotate_and_exchange(int i) {
 			S_i->shift_one(i, -1*m_R);
@@ -85,8 +87,9 @@ class RECA {
 
 			if ( rand0_1() < P ) {
 				m_cluster.add(j);
+				m_stack.push(j);
 				// Propigate from this new site
-				propigate(j);
+				//propigate(j);
 			}
 			else {
 				// Reset values to initial
@@ -124,8 +127,13 @@ class RECA {
 			m_cluster.add(i);
 
 			// Propigate from seed site, building the cluster
-			propigate(i);
-
+			//propigate(i);
+			m_stack.push(i);
+			while(!m_stack.empty()){
+				i = m_stack.top();
+				m_stack.pop();
+				propigate(i);
+			}
 			// Reaches here when all propigation fails, or the entire state is added to the cluster
 			m_cluster.clear();
 
