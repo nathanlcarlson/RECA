@@ -60,8 +60,8 @@ class RECA {
     int m_step = 0;
 
 		Cluster m_cluster;
-		std::shared_ptr<State> S_i;
-		std::shared_ptr<State> S_j;
+		State* S_i;
+		State* S_j;
 		std::stack<int> m_stack;
 
 		void crotate_and_exchange(int i) {
@@ -113,7 +113,7 @@ class RECA {
 			: m_L(_L), m_cluster(_L)
 		{}
 
-		void evolve_state(const std::shared_ptr<State>& _S_i, const std::shared_ptr<State>& _S_j) {
+		void evolve_state(State* _S_i, State* _S_j) {
 
 			S_i = _S_i;
 			S_j = _S_j;
@@ -155,7 +155,7 @@ class Metropolis {
 		{
 		}
 
-		void evolve_state(const std::shared_ptr<State>& _state) {
+		void evolve_state(State* _state) {
 
 			// Select site to propose change
 			int i = randN(_state->size());
