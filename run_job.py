@@ -14,48 +14,34 @@ def main():
     with open(args.yaml) as f:
       yargs = yaml.safe_load(f)
 
-    ydefaults = {'beta': [1],
-                'width': [10],
-                'percent_RECA': [5],
-                'samples': 5,
-                'root': 'data',
-                'pri_or_all': 0,
-                'n_states': [8]
-                }
+    # ydefaults = {'beta': 1,
+    #             'width': 10,
+    #             'percent_RECA': 5,
+    #             'samples': 5,
+    #             'root': 'data',
+    #             'n_states': 8
+    #             }
+    #
+    # yargs = set_defaults(yargs, ydefaults)
 
-    yargs = set_defaults(yargs, ydefaults)
+    for sim in yargs:
+        sim = yargs[sim];
+        print(sim)
+        for c in range(sim['samples']):
+            L = str(sim['width'])
+            beta = str(sim['beta'])
+            freq = str(sim['percent_RECA'])
+            N = str(sim['n_states'])
+            if 'seed' in sim.keys():
+                seed = str(sim['seed'])
+            else:
+                seed = str(randint(0,pow(2,20)))
 
-    for N in yargs['n_states']:
-        for L in yargs['width']:
-          for beta in yargs['beta']:
-            for freq in yargs['percent_RECA']:
-              for c in range(yargs['samples']):
+            mkdirs(sim['root']+"/N"+N+"/L"+L+"/Beta"+beta+"/Freq"+freq)
+            path = sim['root']+"/N"+N+"/L"+L+"/Beta"+beta+"/Freq"+freq+"/"+str(c)
 
-                L = str(L)
-                beta = str(beta)
-                freq = str(freq)
-                N = str(N)
-                S = str(yargs['pri_or_all'])
-                if 'seed' in yargs.keys():
-                    seed = str(yargs['seed'])
-                else:
-                    seed = str(randint(0,pow(2,20)))
-
-                mkdirs(yargs['root']+"/N"+N+"/L"+L+"/Beta"+beta+"/Freq"+freq)
-                path = yargs['root']+"/N"+N+"/L"+L+"/Beta"+beta+"/Freq"+freq+"/"+str(c)
-
-                print "./RECA",L,beta,freq,S,path,seed,N
-                subprocess.Popen(["./RECA",
-                                  L,
-                                  beta,
-                                  freq,
-                                  S,
-                                  path,
-                                  seed,
-                                  N
-                                  ],
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.STDOUT)
+            print("./RECA",L,beta,freq,path,seed,N)
+            subprocess.Popen(["./RECA",L,beta,freq,path,seed,N],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
 
 def set_defaults(yargs, ydefaults):
 
