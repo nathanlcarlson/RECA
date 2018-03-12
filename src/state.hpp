@@ -7,47 +7,37 @@
 #include <time.h>
 #include "utils.hpp"
 #include "node.hpp"
+#include "bonds.hpp"
 
 
 class State {
 
-	typedef std::function <double (State*, int, int)> EnergyFunction_Ptr;
-	typedef StaticCouplings2D Bonds;
-
-	private:
+	protected:
 
 		double m_L;
 
-		EnergyFunction_Ptr m_energy;
 		// TODO Simplify bonds
-		std::vector <std::shared_ptr<Bonds>> m_bonds;
-		std::map <char, std::shared_ptr<Bonds>> m_bonds_map;
-		std::shared_ptr <Node> m_node;
-		std::vector <double> m_v;
+		std::shared_ptr<Bonds> m_bonds;
+		std::map<char, std::shared_ptr<Bonds>> m_bonds_map;
+		std::shared_ptr<Node> m_node;
+		std::vector<double> m_v;
 
 	public:
 
 		double B;
 
-		// TODO Simplify or create multiple  ructors
-		template< typename TBonds >
-		State(int t_L, int t_B,
-			    EnergyFunction_Ptr t_f,
-					TBonds t_bonds,
-					std::shared_ptr<Node> t_node)
-			: B(t_B), m_energy(t_f), m_L(t_L), m_bonds(t_bonds), m_node(t_node)
+		State(int t_L, int t_B, std::shared_ptr<Bonds> t_bonds, std::shared_ptr<Node> t_node)
+			: B(t_B), m_L(t_L), m_bonds(t_bonds), m_node(t_node)
 		{
-			for(auto& b: t_bonds ) {
-				m_bonds_map[b->id] = b;
-			}
+			m_bonds_map[t_bonds->get_id()] = t_bonds;
 			m_v.resize(t_L);
 			randomize_all();
 		}
 
 		// Calculate energy between i and j
-		double energy(int i, int j) {
-			return m_energy(this, i, j);
-		}
+		virtual double energy(int i, int j){
+			return 0.0;
+		};
 
 		// Shift all with help of Node class
 		void shift_all() {
@@ -111,14 +101,14 @@ class State {
 
 		// Get first bond in list
 		std::shared_ptr<Bonds> bonds() {
-			return m_bonds[0];
+			return m_bonds;
 		}
 
 		// Calculate total energy
 		double total_energy() {
 			double E = 0;
 			for(int i = 0; i < m_L; i++) {
-				for (auto neighbor = m_bonds[0]->begin(i); neighbor != m_bonds[0]->end(i); ++neighbor) {
+				for (auto neighbor = m_bonds->begin(i); neighbor != m_bonds->end(i); ++neighbor) {
 					if( i < *neighbor) {
 						E += energy(i, *neighbor);
 					}

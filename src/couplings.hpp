@@ -3,16 +3,10 @@
 
 #include <unordered_map>
 #include <functional>
-#include <iostream>
 #include "utils.hpp"
+#include "bonds.hpp"
 
-typedef std::function <double (node, node)> CouplingEnergyFunction_Ptr;
-typedef std::unordered_map <int, double> Edge;
-typedef std::vector <Edge> CouplingsMap;
-typedef std::vector <int> Neighborhood;
-typedef std::vector <Neighborhood> Neighbors;
-
-class StaticCouplings2D {
+class StaticCouplings2D : public Bonds{
 
 	private:
 
@@ -20,19 +14,17 @@ class StaticCouplings2D {
 		CouplingsMap m_map;
 		Neighbors m_neighbors;
 
-		int m_size;
+		char m_id;
+		int m_L;
 
 		void save_couplings();
+		void square2D(bool periodic);
 
 	public:
 
-		char id;
-
-		StaticCouplings2D(char t_id, int t_n, CouplingEnergyFunction_Ptr t_f);
-
-		double&operator()(int t_i, int t_j);
+		StaticCouplings2D(char t_id, int t_n, std::string periodic, CouplingEnergyFunction_Ptr t_f);
+		char get_id();
 		double get(int t_i, int t_j);
-		void square2D(bool periodic = true);
 		void print();
 		void scale_all( double factor );
 

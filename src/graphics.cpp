@@ -2,9 +2,11 @@
 #include <memory>
 #include <math.h>
 #include <GLFW/glfw3.h>
+
 #include "utils.hpp"
 #include "couplings.hpp"
-#include "state.hpp"
+#include "jja.hpp"
+#include "ising.hpp"
 #include "algorithm.hpp"
 #include "discrete.hpp"
 #include "continuous.hpp"
@@ -13,35 +15,20 @@
 #define A 'A'
 #define J 'J'
 
-// May use different type of bonds, os typedef
-typedef StaticCouplings2D Bonds;
-
 // Define how to calculate bond energy between two nodes for jja
 double a_coupling_energy(node i, node j) {
 
 	return (i.x * j.y - i.y * j.x);
 
 }
-
-// Define how to calculate energy between two nodes for jja
-double jja_energy(State* t, int i, int j) {
-
-	return cos( 2 * M_PI * ( (*t)[i] - (*t)[j] - t->bonds(A)->get(i, j) ) );
-
-}
-
 // Ising
 double ising_coupling_energy(node i, node j) {
 
 	return 1.0;
 }
 
-double ising_energy(State* t, int i, int j) {
-
-	return -1 * (*t)[i] * (*t)[j];
-}
 // Makes graphic
-void display_state(const std::shared_ptr<State>& state, int n, int n_states, int pos) {
+void display_state(State* state, int n, int n_states, int pos) {
 
 	int c = 0;
 	double dmax = sqrt(n_states);
@@ -115,40 +102,21 @@ int main(int argc, char **argv) {
 	double beta = atof(argv[2]);
 	double freq = atof(argv[3])/100.0;
 
-	// XY+A model
-	//  Set-up bonds
-	auto bonds_A = std::make_shared<Bonds>(A, n, a_coupling_energy);
-	bonds_A->square2D(false);
-	bonds_A->scale_all( 1.0/w );
-	std::vector<std::shared_ptr<Bonds>> bondsA{bonds_A};
-	//  Define node values
-	auto nodes_A = std::make_shared<Continuous>(1.0);
-	//  Define state
-	auto jja_state = std::make_shared<State>(n, beta, jja_energy, bondsA, nodes_A);
-
 	// Ising model
 	//  Set-up bonds
-	auto bonds_J = std::make_shared<Bonds>(J, n, ising_coupling_energy);
-	bonds_J->square2D(true);
-	std::vector<std::shared_ptr<Bonds>> bondsJ{bonds_J};
+	auto bonds_J = std::make_shared<StaticCouplings2D>(J, n, "periodic", ising_coupling_energy);
+
 	//  Define node values
 	std::vector<double> ising_nodes{-1.0, 1.0};
 	auto nodes_J = std::make_shared<Discrete>(ising_nodes);
-	//  Define state
-	auto ising_state = std::make_shared<State>(n, beta, ising_energy, bondsJ, nodes_J);
-
-	auto my_state = std::make_shared<State>( *jja_state );
-	std::string state(argv[5]);
-	if ( state == "ising") {
-		my_state = ising_state;
-	}
 
 	// N Replicas to use
-	int n_replicas = atoi(argv[6]);
-	std::vector<std::shared_ptr<State>> replicas;
-	for(int i=0; i<n_replicas; ++i){
-		replicas.push_back(std::make_shared<State>( *my_state ));
-		replicas[i]->randomize_all();
+	int n_states = atoi(argv[6]);
+	//  Define states
+	std::vector<State*>  state_pool;
+	for(int i=0; i<n_states; ++i){
+		state_pool.push_back(new Ising(n, beta, bonds_J, nodes_J));
+		state_pool[i]->randomize_all();
 	}
 
 	// Choices of algorithms
@@ -160,19 +128,15 @@ int main(int argc, char **argv) {
 
 	// Initialize the library
 	if (!glfwInit()) {
-
 		return -1;
-
 	}
 
 	// Create a windowed mode window and its OpenGL context
 	window = glfwCreateWindow(1000, 1000, "State", NULL, NULL);
 
 	if (!window) {
-
 		glfwTerminate();
 		return -1;
-
 	}
 	// Make the window's context current
 	glfwMakeContextCurrent(window);
@@ -182,29 +146,27 @@ int main(int argc, char **argv) {
 	// Only render according to interval
 	int interval = atoi(argv[4]);
 	int count = interval;
-	int n_steps = 0;
 	while (!glfwWindowShouldClose(window)) {
 
 		// Step the state forward
 		// Evovle mixed
 		if(rand0_1() < freq){
-			my_reca->evolve_state(my_state, replicas[randN(n_replicas)]);
+			int r1 = randN(n_states);
+			int r2 = randN(n_states-1);
+			if(r2>=r1) r2++;
+			my_reca->evolve_state(state_pool[r1], state_pool[r2]);
 		}
 		else {
-			my_metro->evolve_state(my_state);
-			for( auto& replica: replicas){
+			for( auto& replica: state_pool){
 				my_metro->evolve_state(replica);
 			}
 		}
 
 		count--;
-		n_steps++;
 		if (count == 0) {
 			glClear(GL_COLOR_BUFFER_BIT);
-			// TODO Fix this strategy for multiple states
-			display_state(my_state, w, n_replicas+1, n_replicas+1);
-			for(int i = 0; i < n_replicas; i++){
-				display_state(replicas[i], w, n_replicas+1, i+1);
+			for(int i = 0; i < n_states; i++){
+				display_state(state_pool[i], w, n_states, i);
 			}
 			glfwSwapBuffers(window);
 

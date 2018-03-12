@@ -7,14 +7,13 @@ A Python script is included to run batch jobs. A configuration file using YAML f
 ### Configuration Options
 | Option        | Help         | Default | Type     |
 | ------------- |:-------------|---------|----------|
-| *beta* | Values of Beta, inverse temperature | [1] | List of Numbers
-| *width* | Simulation is square array, these are the widths to use | [10] | List of Integers
-| *percent_RECA* | This is tuned to test RECA and Metropolis mixes | [5] | List of Numbers, 0 - 100
-| *n_states* | Number of States to use | [8] | List of Integers, 2 - N
+| *beta* | Beta, inverse temperature | None | Number
+| *width* | Simulation is square array, this is the width to use | None | Integer
+| *percent_RECA* | This is tuned to test RECA and Metropolis mixes | None | Number, 0 - 100
+| *n_states* | Number of States to use | None | Integer, greater than or equal to 2
 | *seed* | Seed for Random Number Generator | Random Integer 0 - 2^20 | Integer
-| *pri_or_all* | Whether Metropolis operates on only the primary or all States | 0 | Integer, 0 for Primary, 1 for All
-| *samples* | Number of times to simulate each set of parameters | 5 | Integer
-| *root* | The root level for data file storage | 'data' | String
+| *samples* | Number of times to simulate each set of parameters | None | Integer
+| *root* | The root level for data file storage | None | String
 
 ### Use
 usage: run_job.py [-h] -f YAML

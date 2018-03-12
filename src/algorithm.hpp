@@ -2,6 +2,7 @@
 #define ALGORITHM_HPP
 
 #include <limits>
+#include <stack>
 #include "state.hpp"
 
 // Store info for cluster growth
@@ -59,8 +60,9 @@ class RECA {
     int m_step = 0;
 
 		Cluster m_cluster;
-		std::shared_ptr<State> S_i;
-		std::shared_ptr<State> S_j;
+		State* S_i;
+		State* S_j;
+		std::stack<int> m_stack;
 
 		void crotate_and_exchange(int i) {
 			S_i->shift_one(i, -1*m_R);
@@ -85,8 +87,9 @@ class RECA {
 
 			if ( rand0_1() < P ) {
 				m_cluster.add(j);
+				m_stack.push(j);
 				// Propigate from this new site
-				propigate(j);
+				//propigate(j);
 			}
 			else {
 				// Reset values to initial
@@ -110,7 +113,7 @@ class RECA {
 			: m_L(_L), m_cluster(_L)
 		{}
 
-		void evolve_state(const std::shared_ptr<State>& _S_i, const std::shared_ptr<State>& _S_j) {
+		void evolve_state(State* _S_i, State* _S_j) {
 
 			S_i = _S_i;
 			S_j = _S_j;
@@ -124,8 +127,13 @@ class RECA {
 			m_cluster.add(i);
 
 			// Propigate from seed site, building the cluster
-			propigate(i);
-
+			//propigate(i);
+			m_stack.push(i);
+			while(!m_stack.empty()){
+				i = m_stack.top();
+				m_stack.pop();
+				propigate(i);
+			}
 			// Reaches here when all propigation fails, or the entire state is added to the cluster
 			m_cluster.clear();
 
@@ -147,7 +155,7 @@ class Metropolis {
 		{
 		}
 
-		void evolve_state(const std::shared_ptr<State>& _state) {
+		void evolve_state(State* _state) {
 
 			// Select site to propose change
 			int i = randN(_state->size());
