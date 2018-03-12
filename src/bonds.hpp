@@ -12,7 +12,9 @@ typedef std::vector<int> Neighborhood;
 typedef std::vector<Neighborhood> Neighbors;
 
 class Bonds {
-
+	protected:
+		char m_id;
+		
 	public:
 
 		virtual char get_id() = 0;
