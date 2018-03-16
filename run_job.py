@@ -36,12 +36,15 @@ def main():
                 seed = str(sim['seed'])
             else:
                 seed = str(randint(0,pow(2,20)))
-
+            if 'cpu_seconds' in sim.keys():
+                time = str(sim['cpu_seconds'])
+            else:
+                time = 30
             mkdirs(sim['root']+"/N"+N+"/L"+L+"/Beta"+beta+"/Freq"+freq)
             path = sim['root']+"/N"+N+"/L"+L+"/Beta"+beta+"/Freq"+freq+"/"+str(c)
 
-            print("./RECA",L,beta,freq,path,seed,N)
-            subprocess.Popen(["./RECA",L,beta,freq,path,seed,N],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+            print(" ".join(["./RECA",L,beta,freq,path,seed,N,time]))
+            subprocess.Popen(["./RECA",L,beta,freq,path,seed,N,time],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
 
 def set_defaults(yargs, ydefaults):
 

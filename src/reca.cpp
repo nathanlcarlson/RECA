@@ -26,8 +26,8 @@ double a_coupling_energy(node i, node j) {
 }
 
 int main(int argc, char **argv) {
-	if (argc != 7) {
-		std::cout << "\treca [width] [beta] [percent RECA] [Filename] [Seed] [N states]\n";
+	if (argc != 8) {
+		std::cout << "\treca [width] [beta] [percent RECA] [Filename] [Seed] [N states] [CPU Seconds]\n";
 		return 1;
 	}
 	seedRand( atoi(argv[5]) );
@@ -61,33 +61,33 @@ int main(int argc, char **argv) {
   	double c_max = 1 << 15;
 	double c_interval = 50;
 	double t_interval = 0.005;
-	double t_max = 30;
+	double t_max = atof(argv[7]);
 	double t = 0;
   	double Et, Mx, My, phi;
 
-	std::vector<std::array<double, 2>> data;
+	std::vector<std::array<double, 4>> data;
 	std::cout << "Initialization successful, beginning simulation...\n";
 	// Gather metrics
-	std::array<double, 2> c_data;
+	std::array<double, 4> c_data;
 	clock_t end;
 	clock_t begin = clock();
 	while (t < t_max) {
 
 		// c = (reca->step() + metro->step())/(double)n;
 		Et = state_pool[PRI]->total_energy();
-		// Mx = 0;
-		// My = 0;
-		// for(int i = 0; i < n; ++i){
-		//   phi = 2*M_PI*(*state_pool[PRI])[i];
-		//   Mx += cos(phi);
-		//   My += sin(phi);
-		// }
+		Mx = 0;
+		My = 0;
+		for(int i = 0; i < n; ++i){
+		  phi = (*state_pool[PRI])[i];
+		  Mx += cos(phi);
+		  My += sin(phi);
+		}
 		end = clock();
 		t = double(end - begin) / CLOCKS_PER_SEC;
 		c_data[0] = t;
 		c_data[1] = Et;
-		// c_data[2] = Mx;
-		// c_data[3] = My;
+		c_data[2] = Mx;
+		c_data[3] = My;
 		data.push_back(c_data);
 		// Evovle mixed
 		// while((reca->step() + metro->step())/(double)n - c < c_interval){
@@ -118,9 +118,9 @@ int main(int argc, char **argv) {
 	for(int i=0; i<data.size(); ++i){
 		c = data[i][0];
 		Et = data[i][1];
-		// Mx = data[i][2];
-		// My = data[i][3];
-		oenr_file << c << ' ' << Et << '\n';
+		Mx = data[i][2];
+		My = data[i][3];
+		oenr_file << c << ' ' << Et << ' ' << Mx << ' ' << My << '\n';
 	}
 
 	oenr_file.close();
