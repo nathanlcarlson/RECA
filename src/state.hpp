@@ -12,65 +12,68 @@
 
 class State {
 
-	protected:
+	private:
 
 		double m_L;
 
-		// TODO Simplify bonds
-		std::shared_ptr<Bonds> m_bonds;
-		std::map<char, std::shared_ptr<Bonds>> m_bonds_map;
-		std::shared_ptr<Node> m_node;
+		Node& m_node;
 		std::vector<double> m_v;
 
 	public:
 
 		double B;
 
-		State(int t_L, int t_B, std::shared_ptr<Bonds> t_bonds, std::shared_ptr<Node> t_node)
-			: B(t_B), m_L(t_L), m_bonds(t_bonds), m_node(t_node)
+		State(int t_L, int t_B, Node& t_node)
+			: B(t_B), m_L(t_L), m_node(t_node)
 		{
-			m_bonds_map[t_bonds->get_id()] = t_bonds;
 			m_v.resize(t_L);
-			randomize_all();
 		}
 
+		// Get site i value
+		double get(int i){
+			return m_v[i];
+		}
+		// Get site i value
+		double s(int i){
+			return m_v[i];
+		}
+		virtual Bonds::const_iterator neighbors_begin(int i) = 0;
+		virtual Bonds::const_iterator neighbors_end(int i) = 0;
 		// Calculate energy between i and j
-		virtual double energy(int i, int j){
-			return 0.0;
-		};
+		virtual double energy(int i, int j) = 0;
 
 		// Shift all with help of Node class
 		void shift_all() {
 			for(int i = 0; i < m_L; ++i) {
-				m_v[i] = m_node->shifted_value(m_v[i]);
+				m_v[i] = m_node.shifted_value(m_v[i]);
 			}
 		}
 
 		// Shift one site with help of Node class
 		void shift_one(int i, double _s) {
-			m_v[i] = m_node->shifted_value(m_v[i], _s);
+			m_v[i] = m_node.shifted_value(m_v[i], _s);
 		}
 		void shift_one(int i) {
-			m_v[i] = m_node->shifted_value(m_v[i]);
+			m_v[i] = m_node.shifted_value(m_v[i]);
 		}
 		void shift_one() {
 			shift_one(randN(m_L));
 		}
 		// Generate shift value to use later
 		double get_shift() {
-			return m_node->get_shift();
+			return m_node.get_shift();
 		}
 
 		// Randomizes the whole state with help of Node class
 		void randomize_all() {
 			for(int i = 0; i < m_L; ++i) {
-				m_v[i] = m_node->random_value();
+				m_v[i] = m_node.random_value();
 			}
 		}
 
 		// Randomizes one with help of Node class
 		int randomize_one(int i) {
-			m_v[i] = m_node->random_value();
+			m_v[i] = m_node.random_value();
 			return i;
 		}
 		int randomize_one(){
@@ -79,7 +82,7 @@ class State {
 
 		// Get color with help of Node class
 		void getColor(int i, std::vector<double>& _rgb_out) {
-			return m_node->getRGB(m_v[i], _rgb_out);
+			return m_node.getRGB(m_v[i], _rgb_out);
 		}
 
 		void print() {
@@ -92,29 +95,6 @@ class State {
 
 		double&operator[](int i) {
 			return m_v[i];
-		}
-
-		// Get bonds by ID
-		std::shared_ptr<Bonds> bonds(char id) {
-			return m_bonds_map[id];
-		}
-
-		// Get first bond in list
-		std::shared_ptr<Bonds> bonds() {
-			return m_bonds;
-		}
-
-		// Calculate total energy
-		double total_energy() {
-			double E = 0;
-			for(int i = 0; i < m_L; i++) {
-				for (auto neighbor = m_bonds->begin(i); neighbor != m_bonds->end(i); ++neighbor) {
-					if( i < *neighbor) {
-						E += energy(i, *neighbor);
-					}
-				}
-			}
-			return E;
 		}
 
 		int size() {

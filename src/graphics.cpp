@@ -4,28 +4,9 @@
 #include <GLFW/glfw3.h>
 
 #include "utils.hpp"
-#include "couplings.hpp"
 #include "jja.hpp"
 #include "ising.hpp"
 #include "algorithm.hpp"
-#include "discrete.hpp"
-#include "continuous.hpp"
-
-// Used as an ID
-#define A 'A'
-#define J 'J'
-
-// Define how to calculate bond energy between two nodes for jja
-double a_coupling_energy(node i, node j) {
-
-	return (i.x * j.y - i.y * j.x);
-
-}
-// Ising
-double ising_coupling_energy(node i, node j) {
-
-	return 1.0;
-}
 
 // Makes graphic
 void display_state(State* state, int n, int n_states, int pos) {
@@ -62,13 +43,13 @@ void display_state(State* state, int n, int n_states, int pos) {
 			double x2 = 2 * w * (i + 1 ) ;
 			double y1 = 2 * w * j ;
 			double y2 = 2 * w * (j + 1) ;
-			glVertex3f(x1, y1, 0.0);
-			glVertex3f(x1, y2, 0.0);
-			glVertex3f(x2, y1, 0.0);
+			glVertex2f(x1, y1);
+			glVertex2f(x1, y2);
+			glVertex2f(x2, y1);
 
-			glVertex3f(x1, y2, 0.0);
-			glVertex3f(x2, y1, 0.0);
-			glVertex3f(x2, y2, 0.0);
+			glVertex2f(x1, y2);
+			glVertex2f(x2, y1);
+			glVertex2f(x2, y2);
 			glEnd();
 
 		}
@@ -90,9 +71,9 @@ int main(int argc, char **argv) {
 	// The needed parameters
 	// TODO	Get parameters from file?
 	if (argc != 7) {
-    std::cout << "\tgraphics [width] [beta] [percent RECA] [display interval] [state_type] [n repilcas]\n";
-    return 1;
-  }
+    	std::cout << "\tgraphics [width] [beta] [percent RECA] [display interval] [state_type] [n repilcas]\n";
+    	return 1;
+	}
 
 	// Seed with time
 	seedRand( time(NULL) );
@@ -102,23 +83,14 @@ int main(int argc, char **argv) {
 	double beta = atof(argv[2]);
 	double freq = atof(argv[3])/100.0;
 
-	// Ising model
-	//  Set-up bonds
-	auto bonds_J = std::make_shared<StaticCouplings2D>(J, n, "periodic", ising_coupling_energy);
-
-	//  Define node values
-	std::vector<double> ising_nodes{-1.0, 1.0};
-	auto nodes_J = std::make_shared<Discrete>(ising_nodes);
-
 	// N Replicas to use
 	int n_states = atoi(argv[6]);
+
 	//  Define states
 	std::vector<State*>  state_pool;
 	for(int i=0; i<n_states; ++i){
-		state_pool.push_back(new Ising(n, beta, bonds_J, nodes_J));
-		state_pool[i]->randomize_all();
+		state_pool.push_back(new JJA(n, beta));
 	}
-
 	// Choices of algorithms
 	auto my_reca = std::make_unique<RECA>( n );
 	auto my_metro = std::make_unique<Metropolis>();
@@ -176,10 +148,8 @@ int main(int argc, char **argv) {
 		}
 		// Poll for and process events
 		glfwPollEvents();
-
 	}
-
 	glfwTerminate();
-
+	state_pool.clear();
 	return 0;
 }
