@@ -1,82 +1,58 @@
 #include "couplings.hpp"
 
-StaticCouplings2D::StaticCouplings2D(char t_id, int t_n, std::string t_periodic, CouplingEnergyFunction_Ptr t_f)
-  : m_energy(t_f), m_L(t_n), m_id(t_id)
+StaticCouplings2D::StaticCouplings2D(int t_n)
+  : m_L(t_n)
 {
 	m_map.resize(t_n);
-  m_neighbors.resize(t_n);
-  if(t_periodic=="periodic"){
-    square2D(true);
-  }
-  else if(t_periodic=="aperiodic"){
-    square2D(false);
-  }
+    m_neighbors.resize(t_n);
+    m_w = std::sqrt(m_L);
 }
-char StaticCouplings2D::get_id(){
-  return m_id;
+int StaticCouplings2D::x(int i){
+    return i % m_w;
 }
-void StaticCouplings2D::square2D(bool periodic) {
+int StaticCouplings2D::y(int i){
+    return i / m_w;
+}
+void StaticCouplings2D::square2DPeriodic(){
+    int j, _y;
+    for (int i = 0; i < m_L; i++) {
+        _y = y(i);
+        j = m_w * _y + mod(i + 1, m_w);
+        m_map[i][j] = energy(i,j);
 
-	int w = std::sqrt(m_L);
-	int j, x, y;
+        j = m_w * _y + mod(i - 1, m_w);
+        m_map[i][j] = energy(i,j);
 
-	if (periodic) {
-		for (int i = 0; i < m_L; i++) {
-			x = i % w;
-			y = i / w;
-			j = w * y + mod(i + 1, w);
-			m_map[i][j] = m_energy(
-			    make_node(x, y, 0),
-			    make_node(j % w, j / w, 0));
-			j = w * (y) + mod(i - 1, w);
-			m_map[i][j] = m_energy(
-			    make_node(x, y, 0),
-			    make_node(j % w, j / w, 0));
-			j = mod(i + w, m_L);
-			m_map[i][j] = m_energy(
-			    make_node(x, y, 0),
-			    make_node(j % w, j / w, 0));
-			j = mod(i - w, m_L);
-			m_map[i][j] = m_energy(
-			    make_node(x, y, 0),
-			    make_node(j % w, j / w, 0));
+        j = mod(i + m_w, m_L);
+        m_map[i][j] = energy(i,j);
+
+        j = mod(i - m_w, m_L);
+        m_map[i][j] = energy(i,j);
+    }
+    save_couplings();
+}
+void StaticCouplings2D::square2DAperiodic() {
+    int j, _y;
+	for (int i = 0; i < m_L; i++) {
+        _y = y(i);
+		if ((i + 1) % m_w != 0) {
+			j = m_w * _y + mod(i + 1, m_w);
+            m_map[i][j] = energy(i,j);
+		}
+		if (i % m_w != 0) {
+			j = m_w * _y + mod(i - 1, m_w);
+            m_map[i][j] = energy(i,j);
+		}
+		if (i + m_w < m_L) {
+			j = mod(i + m_w, m_L);
+            m_map[i][j] = energy(i,j);
+		}
+		if (i - m_w >= 0) {
+			j = mod(i - m_w, m_L);
+            m_map[i][j] = energy(i,j);
 		}
 	}
-	else {
-		for (int i = 0; i < m_L; i++) {
-			x = i % w;
-			y = i / w;
-			if ((i + 1) % w != 0) {
-				j = w * y + mod(i + 1, w);
-				m_map[i][j] = m_energy(
-				    make_node(x, y, 0),
-				    make_node(j % w, j / w, 0));
-
-			}
-			if (x != 0) {
-				j = w * y + mod(i - 1, w);
-				m_map[i][j] = m_energy(
-				    make_node(x, y, 0),
-				    make_node(j % w, j / w, 0));
-
-			}
-			if (i + w < m_L) {
-				j = mod(i + w, m_L);
-				m_map[i][j] = m_energy(
-				    make_node(x, y, 0),
-				    make_node(j % w, j / w, 0));
-
-			}
-			if (i - w >= 0) {
-				j = mod(i - w, m_L);
-				m_map[i][j] = m_energy(
-				    make_node(x, y, 0),
-				    make_node(j % w, j / w, 0));
-
-			}
-		}
-	}
-  save_couplings();
+    save_couplings();
 }
 
 double StaticCouplings2D::get(int t_i, int t_j) {
@@ -111,12 +87,12 @@ void StaticCouplings2D::save_couplings() {
     m_neighbors[i].shrink_to_fit();
   }
 }
-Neighborhood::iterator StaticCouplings2D::begin(int i) {
+StaticCouplings2D::const_iterator StaticCouplings2D::begin(int i) {
 
 	return m_neighbors[i].begin();
 }
 
-Neighborhood::iterator StaticCouplings2D::end(int i) {
+StaticCouplings2D::const_iterator StaticCouplings2D::end(int i) {
 
 	return m_neighbors[i].end();
 }

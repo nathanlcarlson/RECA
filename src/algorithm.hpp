@@ -22,24 +22,18 @@ class Cluster {
 
 			// Resize to total number of nodes
 			m_cluster.resize(t_N);
-
 		}
 
 		bool contains(int i) {
-
 			// Check if node is in cluster by checking against the current ID
 			return m_cluster[i] == m_current;
-
 		}
 
 		void add(int i) {
-
 			// Add node to cluster by setting equal to the current cluster ID
 			m_cluster[i] = m_current;
-
 		}
 		void clear() {
-
 			// Decrement current, "removing" all nodes from cluster
 			m_current -= 1;
 
@@ -100,7 +94,7 @@ class RECA {
 
 		// Recursively called to grow cluster
 		void propigate(int i) {
-			for (auto neighbor = S_i->bonds()->begin(i); neighbor != S_i->bonds()->end(i); ++neighbor) {
+			for (auto neighbor = S_i->neighbors_begin(i); neighbor != S_i->neighbors_end(i); ++neighbor) {
 				int j = *neighbor;
 				if (!(m_cluster.contains(j))) {
 					q_swap(i, j);
@@ -164,7 +158,7 @@ class Metropolis {
 			double E_f = 0;
 
 			// Calculate initial energy
-			for (auto neighbor = _state->bonds()->begin(i); neighbor != _state->bonds()->end(i); ++neighbor) {
+			for (auto neighbor = _state->neighbors_begin(i); neighbor != _state->neighbors_end(i); ++neighbor) {
 
 				int j = *neighbor;
 				E_i += _state->energy(i, j);
@@ -176,7 +170,7 @@ class Metropolis {
 			_state->randomize_one(i);
 
 			// Calculate new energy
-			for (auto neighbor = _state->bonds()->begin(i); neighbor != _state->bonds()->end(i); ++neighbor) {
+			for (auto neighbor = _state->neighbors_begin(i); neighbor != _state->neighbors_end(i); ++neighbor) {
 
 				int j = *neighbor;
 				E_f += _state->energy(i, j);
