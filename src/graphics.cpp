@@ -85,12 +85,18 @@ int main(int argc, char **argv) {
 
 	// N Replicas to use
 	int n_states = atoi(argv[6]);
-
+	const std::string model = argv[5];
 	//  Define states
 	std::vector<State*>  state_pool;
 	for(int i=0; i<n_states; ++i){
-		state_pool.push_back(new JJA(n, beta));
+		if(model == "jja"){
+			state_pool.push_back(new JJA(n, beta));
+		}
+		else{
+			state_pool.push_back(new Ising(n, beta));
+		}
 	}
+
 	// Choices of algorithms
 	auto my_reca = std::make_unique<RECA>( n );
 	auto my_metro = std::make_unique<Metropolis>();
