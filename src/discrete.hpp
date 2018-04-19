@@ -37,10 +37,9 @@ class Discrete: public Node {
     }
 
     // Values given, discrete
-    Discrete(std::vector<double>& _v)
+    Discrete(std::initializer_list<double> _v)
+    : m_N(_v.size()), m_values(_v)
     {
-      m_values = _v;
-      m_N = m_values.size();
       populate_shift_info();
     }
 

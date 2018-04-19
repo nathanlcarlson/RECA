@@ -3,29 +3,20 @@ import argparse
 import os
 import subprocess
 import yaml
+import json
 from random import randint
 
 def main():
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('-f','--yaml', dest='yaml', required = True,
-                        help='YAML config file')
+    parser.add_argument('-f','--config', dest='config', required = True,
+                        help='JSON config file')
     args = parser.parse_args()
 
-    with open(args.yaml) as f:
-      yargs = yaml.safe_load(f)
+    with open(args.config) as f:
+      config = json.load(f)
 
-    # ydefaults = {'beta': 1,
-    #             'width': 10,
-    #             'percent_RECA': 5,
-    #             'samples': 5,
-    #             'root': 'data',
-    #             'n_states': 8
-    #             }
-    #
-    # yargs = set_defaults(yargs, ydefaults)
-
-    for sim in yargs:
-        sim = yargs[sim];
+    for sim in config:
+        sim = config[sim];
         print(sim)
         for c in range(sim['samples']):
             L = str(sim['width'])
@@ -45,14 +36,6 @@ def main():
 
             print(" ".join(["./RECA",L,beta,freq,path,seed,N,time]))
             subprocess.Popen(["./RECA",L,beta,freq,path,seed,N,time],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-
-def set_defaults(yargs, ydefaults):
-
-  for key in ydefaults.keys():
-    if key not in yargs.keys():
-      yargs[key] = ydefaults[key]
-
-  return yargs
 
 def mkdirs(path):
   try:
