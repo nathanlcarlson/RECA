@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 	double total_evolve = 0;
 	while (total_evolve < t_max) {
 
-		state_pool[randN(n_states)]->metrics(t_data);
+		state_pool[0]->metrics(t_data);
 		oenr_file << total_evolve << ' ';
 		for ( auto& metric: t_data) {
 			oenr_file << metric << ' ';

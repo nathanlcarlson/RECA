@@ -31,12 +31,12 @@ class JJA: public State{
           m_L(_L)
         {
             randomize_all();
-            A.scale_all(-2.0*M_PI/(std::sqrt(_L)-1));
+            A.scale_all(-2.0*M_PI/(10.0*(std::sqrt(_L)-1)));
             // A.print();
         }
 
         double energy(int i, int j) {
-            return cos(s(i)-s(j)-A.get(i,j));
+            return -1*cos(s(i)-s(j)-A.get(i,j));
         }
         void metrics(std::vector<double>& out) {
             out.clear();
