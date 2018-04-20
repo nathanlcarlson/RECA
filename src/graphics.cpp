@@ -7,7 +7,7 @@
 #include "jja.hpp"
 #include "ising.hpp"
 #include "algorithm.hpp"
-
+bool pause = false;
 // Makes graphic
 void display_state(State* state, int n, int n_states, int pos) {
 
@@ -60,9 +60,10 @@ void display_state(State* state, int n, int n_states, int pos) {
 void specialKeys(GLFWwindow *window, int key, int scancode, int action, int mods) {
 
 	if (key == GLFW_KEY_ESCAPE) {
-
 		exit(0);
-
+	}
+	else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+		pause = !(pause);
 	}
 }
 
@@ -144,7 +145,7 @@ int main(int argc, char **argv) {
 		if (count == 0) {
 			glClear(GL_COLOR_BUFFER_BIT);
 			for(int i = 0; i < n_states; i++){
-				display_state(state_pool[i], w, n_states, i);
+				display_state(state_pool[i], w, n_states, i+1);
 			}
 			glfwSwapBuffers(window);
 
@@ -154,6 +155,9 @@ int main(int argc, char **argv) {
 		}
 		// Poll for and process events
 		glfwPollEvents();
+		while(pause){
+			glfwPollEvents();
+		}
 	}
 	glfwTerminate();
 	state_pool.clear();
