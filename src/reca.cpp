@@ -10,8 +10,6 @@
 #include "jja.hpp"
 #include "algorithm.hpp"
 
-#define PRI 0
-
 int main(int argc, char **argv) {
 	if (argc != 8) {
 		std::cout << "\treca [width] [beta] [percent RECA] [Filename] [Seed] [N states] [CPU Seconds]\n";
@@ -38,7 +36,7 @@ int main(int argc, char **argv) {
 	auto reca = std::make_unique<RECA>( n );
 	auto metro = std::make_unique<Metropolis>( );
 
-	double t_interval = 0.005;
+	double t_interval = 0.05;
 	double t_max = atof(argv[7]);
 	double t = 0;
   	double Et, Mx, My, phi;
@@ -55,7 +53,7 @@ int main(int argc, char **argv) {
 	double total_evolve = 0;
 	while (total_evolve < t_max) {
 
-		state_pool[PRI]->metrics(t_data);
+		state_pool[0]->metrics(t_data);
 		oenr_file << total_evolve << ' ';
 		for ( auto& metric: t_data) {
 			oenr_file << metric << ' ';
@@ -68,10 +66,10 @@ int main(int argc, char **argv) {
 		clock_t begin_evolve = clock();
 		while(t_evolve < t_interval){
 			if(rand0_1() < freq){
-				int r1 = randN(n_states-1)+1;
-				// int r2 = randN(n_states-1);
-				// if(r2>=r1) r2++;
-				reca->evolve_state(state_pool[r1], state_pool[PRI]);
+				int r1 = randN(n_states);
+				int r2 = randN(n_states-1);
+				if(r2>=r1) r2++;
+				reca->evolve_state(state_pool[r1], state_pool[r2]);
 			}
 			else {
 				for(int i=0; i<n_states; ++i){
