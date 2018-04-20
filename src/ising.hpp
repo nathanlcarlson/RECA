@@ -19,14 +19,12 @@ class JBonds: public StaticCouplings2D{
 class Ising: public State{
     private:
         JBonds J;
-        Discrete up_down;
-        std::vector<double> up_down_values{-1.0, 1.0};
+        Discrete up_down{-1.0, 1.0};
         int m_L;
 
     public:
         Ising(int _L, int _B)
-        : up_down(up_down_values),
-          State(_L, _B, up_down),
+        : State(_L, _B, up_down),
           J(_L),
           m_L(_L)
         {
